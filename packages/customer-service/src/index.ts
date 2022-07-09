@@ -1,14 +1,14 @@
 import { Microservice } from '@lib/microservice';
 import { initPgConnection } from '@lib/server';
 import { SERVICE_NAME, logger, dbConnection } from './config';
-import { getProducts, getProductById } from './routes';
+import { getCustomerById, createCustomer } from './routes';
 
 const { app, listen } = Microservice({
   serviceName: SERVICE_NAME,
   isProduction: process.env.NODE_ENV === 'production',
   serverCors: false,
   serverApiKey: process.env.SERVER_API_KEY || '',
-  serverPort: parseInt(process.env.PORT || '3001', 10),
+  serverPort: parseInt(process.env.PORT || '3003', 10),
   serverJsonLimit: process.env.SERVER_JSON_LIMIT || '5mb',
   serverListenCb: async () => {
     await initPgConnection(dbConnection, logger);
@@ -20,7 +20,7 @@ const { app, listen } = Microservice({
   logger,
 });
 
-app.get('/v1/products', getProducts);
-app.get('/v1/products/:id', getProductById);
+app.post('/v1/customers', createCustomer);
+app.get('/v1/customers/:id', getCustomerById);
 
 listen();

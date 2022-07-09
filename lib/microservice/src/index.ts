@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { Server } from 'http';
 import express from 'express';
 import bodyParser from 'body-parser';
+import { Message } from 'amqplib';
 import { ICommerceDebugger } from '@lib/common';
+import { rabbitmq } from '@lib/server';
 import _isError from 'lodash/isError';
 
 interface MicroserviceInitOptions {
@@ -16,6 +20,9 @@ interface MicroserviceInitOptions {
   serverListenCb: () => Promise<void>;
   serverExit: () => Promise<void>;
   serverJsonLimit: string;
+  brokerUrl?: string;
+  brokerExchanges?: string[];
+  brokerConsumerHandler?: (message: Message) => Promise<void>;
   logger: ICommerceDebugger;
 }
 
@@ -27,6 +34,9 @@ export function Microservice(opts: MicroserviceInitOptions) {
     serverPort,
     serverApiKey,
     serverJsonLimit,
+    brokerUrl,
+    brokerExchanges,
+    brokerConsumerHandler,
     serverListenCb,
     serverExit,
     logger,
@@ -99,6 +109,14 @@ export function Microservice(opts: MicroserviceInitOptions) {
     app.listen(serverPort, () => {
       logger.info(`SERVER LISTENING | PORT: ${serverPort} | ENV: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
       serverListenCb();
+
+      if (brokerUrl && brokerExchanges) {
+        rabbitmq.connect(brokerUrl, logger).then(connection => {
+          rabbitmq.startProducer(connection, brokerExchanges, logger);
+          rabbitmq.startConsumer(connection, brokerExchanges, logger, brokerConsumerHandler);
+        });
+      }
+
       if (process && process.send) {
         process.send('ready');
       }

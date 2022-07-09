@@ -12,6 +12,12 @@ module.exports = {
     '@babel/preset-typescript',
   ],
   plugins: [
+    [
+      '@babel/plugin-transform-typescript',
+      {
+        allowDeclareFields: true,
+      },
+    ],
     ['@babel/plugin-proposal-class-properties'],
     ['@babel/plugin-transform-runtime'],
     ['@babel/plugin-transform-classes'],

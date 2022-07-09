@@ -1,0 +1,60 @@
+version: '3.3'
+
+services:
+  postgres.warehouse-service:
+    image: postgres:13.2
+    environment:
+      POSTGRES_USER: warehouse_user
+      POSTGRES_PASSWORD: warehouse_password
+      POSTGRES_DB: warehouse
+    ports:
+      - '5435:5432'
+    restart: always
+    volumes:
+      - warehouse_postgres_data:/var/lib/postgresql/data
+
+  postgres.customer-service:
+    image: postgres:13.2
+    environment:
+      POSTGRES_USER: customer_user
+      POSTGRES_PASSWORD: customer_password
+      POSTGRES_DB: customer
+    ports:
+      - '5436:5432'
+    restart: always
+    volumes:
+      - customer_postgres_data:/var/lib/postgresql/data
+
+  postgres.order-processor-service:
+    image: postgres:13.2
+    environment:
+      POSTGRES_USER: order_processor_user
+      POSTGRES_PASSWORD: order_processor_password
+      POSTGRES_DB: order_processor
+    ports:
+      - '5437:5432'
+    restart: always
+    volumes:
+      - order_processor_postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: docker.io/bitnami/rabbitmq:3.10
+    ports:
+      - '4369:4369'
+      - '5551:5551'
+      - '5552:5552'
+      - '5672:5672'
+      - '25672:25672'
+      - '15672:15672'
+    environment:
+      - RABBITMQ_USERNAME=icommerce
+      - RABBITMQ_PASSWORD=icommerce
+    restart: always
+    volumes:
+      - 'rabbitmq_data:/bitnami/rabbitmq/mnesia'
+
+volumes:
+  rabbitmq_data:
+  warehouse_postgres_data:
+  customer_postgres_data:
+  order_processor_postgres_data:

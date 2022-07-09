@@ -24,6 +24,12 @@ checkAndLoadConfig();
 
 const { POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD } = process.env;
 
+/**
+ * Create new PostgreSQL database connection.
+ *
+ * @param {ICommerceDebugger} logger
+ * @returns {Sequelize}
+ */
 export const createPgConnection = (logger: ICommerceDebugger): Sequelize =>
   new Sequelize({
     dialect: 'postgres',
@@ -39,7 +45,7 @@ export const createPgConnection = (logger: ICommerceDebugger): Sequelize =>
 export const initPgConnection = async (connection: Sequelize, logger: ICommerceDebugger) => {
   try {
     await connection.authenticate();
-    logger.info('Database connection has been established successfully.');
+    logger.info('Database connection has been established.');
   } catch (e) {
     logger.error('Unable to connect to the database', e);
   }
