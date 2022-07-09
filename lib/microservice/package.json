@@ -1,0 +1,33 @@
+{
+  "name": "@lib/microservice",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
+    "compile": "npm run compile:module",
+    "compile:module": "tsc -b tsconfig.json",
+    "lint": "eslint --fix --color ./src",
+    "type:check": "tsc --noEmit"
+  },
+  "sideEffects": false,
+  "main": "dist/esm/index",
+  "module": "dist/esm/index",
+  "types": "dist/esm/index",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@lib/common": "*",
+    "@lib/server": "*",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "helmet": "^5.1.0",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.2",
+    "@types/cors": "^2.8.12",
+    "@types/helmet": "^4.0.0",
+    "@types/morgan": "^1.9.3"
+  }
+}

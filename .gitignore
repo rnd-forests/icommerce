@@ -1,0 +1,12 @@
+node_modules/
+lib/*/dist
+packages/*/dist
+.cache
+.nx-cache
+packages/*/.cache
+.vscode
+.DS_Store
+.projectile
+.idea
+.history
+.eslintcache

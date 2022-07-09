@@ -1,0 +1,25 @@
+{
+  "name": "@lib/common",
+  "version": "1.0.0",
+  "private": true,
+  "sideEffects": false,
+  "main": "dist/esm/index",
+  "module": "dist/esm/index",
+  "types": "dist/esm/index",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
+    "compile": "npm run compile:module",
+    "compile:module": "tsc -b tsconfig.json",
+    "lint": "eslint --fix --color ./src",
+    "type:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "debug": "^4.3.4"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.7"
+  }
+}
