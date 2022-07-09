@@ -1,0 +1,18 @@
+{
+  "name": "warehouse-service",
+  "version": "1.0.0",
+  "private": true,
+  "sideEffects": false,
+  "main": "index.js",
+  "scripts": {
+    "dev": "DEBUG=warehouse-service:* npm run dev:compile",
+    "dev:compile": "rm -rf dist && webpack --config webpack.server.js --progress --watch",
+    "type:check": "tsc --noEmit",
+    "lint": "eslint --fix --color ./src"
+  },
+  "dependencies": {
+    "@lib/common": "*",
+    "@lib/server": "*",
+    "@lib/microservice": "*"
+  }
+}

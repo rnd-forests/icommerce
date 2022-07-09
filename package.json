@@ -17,6 +17,8 @@
     "@babel/plugin-transform-runtime": "7.18.2",
     "@babel/preset-env": "7.18.2",
     "@babel/preset-typescript": "7.17.12",
+    "@lib/types": "*",
+    "@lib/webpack": "*",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
     "@types/lodash": "^4.14.182",
     "babel-loader": "8.2.5",
@@ -48,7 +50,11 @@
     ]
   },
   "dependencies": {
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.21.2"
   }
 }

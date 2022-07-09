@@ -1,10 +1,10 @@
 import cors from 'cors';
-import bodyParser from 'body-parser';
-import express, { ErrorRequestHandler } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { logger } from '@lib/common';
 import { Server } from 'http';
+import express from 'express';
+import bodyParser from 'body-parser';
+import { ICommerceDebugger } from '@lib/common';
 import _isError from 'lodash/isError';
 
 interface MicroserviceInitOptions {
@@ -13,9 +13,10 @@ interface MicroserviceInitOptions {
   serverCors: boolean;
   serverPort: number;
   serverApiKey?: string;
-  serverListenCb: () => void;
+  serverListenCb: () => Promise<void>;
   serverExit: () => Promise<void>;
   serverJsonLimit: string;
+  logger: ICommerceDebugger;
 }
 
 export function Microservice(opts: MicroserviceInitOptions) {
@@ -28,9 +29,10 @@ export function Microservice(opts: MicroserviceInitOptions) {
     serverJsonLimit,
     serverListenCb,
     serverExit,
+    logger,
   } = opts;
 
-  logger.info(`Initializing microservice: ${serviceName}`);
+  logger.info(`INITIALIZING MICROSERVICE: ${serviceName}`);
 
   const app = express();
   const server = new Server(app);
@@ -40,7 +42,7 @@ export function Microservice(opts: MicroserviceInitOptions) {
       logger.error(e);
     }
 
-    logger.info('Server process exiting...');
+    logger.info('SERVER PROCESS EXITING...');
 
     const exitCode = _isError(e) ? 1 : 0;
 
@@ -94,19 +96,6 @@ export function Microservice(opts: MicroserviceInitOptions) {
   );
 
   function listen() {
-    const middlewareError: ErrorRequestHandler = (err: Error, _req, res) => {
-      // eslint-disable-next-line no-nested-ternary
-      const response = !_isError(err)
-        ? { error: 'internal-error' }
-        : isProduction
-        ? { error: 'internal-error' }
-        : err.stack;
-
-      res.status(500).send(response);
-    };
-
-    app.use(middlewareError);
-
     app.listen(serverPort, () => {
       logger.info(`SERVER LISTENING | PORT: ${serverPort} | ENV: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
       serverListenCb();
