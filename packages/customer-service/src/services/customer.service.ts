@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import { Identifier } from 'sequelize';
-import Customer from '../../models/customer';
-import * as customerRepository from '../repositories/customer';
+import Customer from '../models/customer';
+import * as customerRepository from '../database/repositories/customer';
 
 export const getById = async (id?: Identifier): Promise<Customer> => customerRepository.getById(id);
 

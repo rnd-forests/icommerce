@@ -1,8 +1,17 @@
-import { Model, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
-import { dbConnection } from '../config';
-import Order from './order';
+import { Model, Sequelize, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 
-class Transaction extends Model<InferAttributes<Transaction>, InferCreationAttributes<Transaction>> {
+export const TRANSACTION_STATUSES = {
+  NEW: 'new',
+  PENDING: 'pending',
+  SUCCESS: 'success',
+};
+
+export const TRANSACTION_TYPES = {
+  GENERAL: 'general',
+  REFUND: 'refund',
+};
+
+export class Transaction extends Model<InferAttributes<Transaction>, InferCreationAttributes<Transaction>> {
   declare id: CreationOptional<string>;
 
   declare customerId: string;
@@ -18,48 +27,45 @@ class Transaction extends Model<InferAttributes<Transaction>, InferCreationAttri
   declare updatedAt: CreationOptional<Date>;
 }
 
-Transaction.init(
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-      allowNull: false,
-    },
-    customerId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
-    orderId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: Order,
-        key: 'id',
+export const defineTransaction = (sequelize: Sequelize, model: typeof Transaction) => {
+  model.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+      customerId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+      orderId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+      type: {
+        type: DataTypes.ENUM('general', 'refund'),
+        defaultValue: 'general',
+        allowNull: false,
+      },
+      status: {
+        type: DataTypes.ENUM('new', 'pending', 'success'),
+        defaultValue: 'new',
+        allowNull: false,
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
       },
     },
-    type: {
-      type: DataTypes.ENUM('general', 'refund'),
-      allowNull: false,
+    {
+      sequelize,
+      modelName: 'Transaction',
+      tableName: 'transactions',
+      timestamps: true,
     },
-    status: {
-      type: DataTypes.ENUM('new', 'success'),
-      defaultValue: 'new',
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-    },
-  },
-  {
-    sequelize: dbConnection,
-    modelName: 'Transaction',
-    tableName: 'transactions',
-    timestamps: true,
-  },
-);
-
-export default Transaction;
+  );
+};

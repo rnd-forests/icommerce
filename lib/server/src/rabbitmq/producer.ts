@@ -17,7 +17,7 @@ export async function startProducer(
   return channel;
 }
 
-export function publish(channel: Channel, topic: string, event: CloudEvent, logger: ICommerceDebugger) {
+export function publish<T>(channel: Channel, topic: string, event: CloudEvent<T>, logger: ICommerceDebugger) {
   logger.info(`[AMQP][producer] publishing message to topic: ${topic}`);
   channel.publish(topic, '#', Buffer.from(event.toString()));
 }

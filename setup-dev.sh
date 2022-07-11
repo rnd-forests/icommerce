@@ -12,6 +12,7 @@ npm run deps
 echo -e "✅ Dependencies installed...\n"
 
 echo "🔴 Running database migrations for microservices..."
+npm run migrate:undo:all
 npm run migrate:all
 echo -e "✅ Database migrations completed...\n"
 

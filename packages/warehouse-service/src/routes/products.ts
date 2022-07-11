@@ -1,5 +1,5 @@
 import { middlewareAsync } from '@lib/server';
-import { getById, getAll } from '../database/services/product.service';
+import { getById, getAll } from '../services/product.service';
 
 export const getProductById = middlewareAsync(async (req, res) => {
   const { id } = req.params;

@@ -3,7 +3,8 @@ import { Microservice } from '@lib/microservice';
 import { initPgConnection } from '@lib/server';
 import { SERVICE_NAME, logger, dbConnection } from './config';
 import { createOrder } from './routes';
-import { handleEventMessage } from './events';
+import { handleEventMessage } from './domain-events';
+import { defineModels } from './models';
 
 const { app, listen } = Microservice({
   serviceName: SERVICE_NAME,
@@ -17,6 +18,7 @@ const { app, listen } = Microservice({
   brokerConsumerHandler: async (message: Message) => handleEventMessage(message),
   serverListenCb: async () => {
     await initPgConnection(dbConnection, logger);
+    defineModels();
   },
   serverExit: async () => {
     await dbConnection.close();

@@ -1,6 +1,6 @@
 import { Identifier } from 'sequelize';
-import Product from '../../models/product';
-import * as productRepository from '../repositories/product';
+import Product from '../models/product';
+import * as productRepository from '../database/repositories/product';
 
 export const getById = async (id?: Identifier): Promise<Product> => productRepository.getById(id);
 

@@ -7,6 +7,7 @@
     "deps": "npm run rm && npm i && npm run compile-libs",
     "prepare": "husky install",
     "migrate:all": "lerna run migrate:up --scope @icommerce/*",
+    "migrate:undo:all": "lerna run migrate:undo:all --scope @icommerce/*",
     "seed:all": "lerna run seed:all --scope @icommerce/*"
   },
   "workspaces": [
@@ -25,6 +26,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
     "@types/amqplib": "^0.8.2",
     "@types/lodash": "^4.14.182",
+    "@types/uuid": "^8.3.4",
     "babel-loader": "8.2.5",
     "core-js": "3.22.8",
     "eslint": "^8.16.0",
@@ -59,10 +61,12 @@
     "cloudevents": "^6.0.2",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "got": "^11.8.5",
     "lodash": "^4.17.21",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.21.2",
+    "uuid": "^8.3.2",
     "yup": "^0.32.11"
   }
 }

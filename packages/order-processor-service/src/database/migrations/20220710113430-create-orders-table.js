@@ -25,7 +25,7 @@ module.exports = {
             allowNull: false,
           },
           status: {
-            type: Sequelize.ENUM('new', 'complete'),
+            type: Sequelize.ENUM('new', 'pending', 'complete'),
             allowNull: false,
           },
           total: {

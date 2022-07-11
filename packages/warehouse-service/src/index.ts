@@ -3,7 +3,7 @@ import { Microservice } from '@lib/microservice';
 import { initPgConnection } from '@lib/server';
 import { SERVICE_NAME, logger, dbConnection } from './config';
 import { getProducts, getProductById } from './routes';
-import { handleEventMessage } from './events';
+import { handleEventMessage } from './domain-events';
 
 const { app, listen } = Microservice({
   serviceName: SERVICE_NAME,

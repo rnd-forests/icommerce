@@ -1,5 +1,5 @@
 import { middlewareAsync } from '@lib/server';
-import { getById, findOrCreate } from '../database/services/customer.service';
+import { getById, findOrCreate } from '../services/customer.service';
 
 export const getCustomerById = middlewareAsync(async (req, res) => {
   const { id } = req.params;
