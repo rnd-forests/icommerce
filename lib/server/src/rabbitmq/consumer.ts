@@ -24,7 +24,7 @@ export async function startConsumer(
   });
 
   channel.consume(queue, message => {
-    logger.info('[AMQP][consumer] received message', message);
+    logger.info('[AMQP][consumer] received message: ', JSON.stringify(message));
     if (messageHandler && message) {
       messageHandler(message);
     }

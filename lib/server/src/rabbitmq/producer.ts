@@ -1,4 +1,5 @@
 import { Connection, Channel } from 'amqplib';
+import { CloudEvent } from 'cloudevents';
 import { ICommerceDebugger } from '@lib/common';
 
 export async function startProducer(
@@ -16,7 +17,7 @@ export async function startProducer(
   return channel;
 }
 
-export function publish(channel: Channel, topic: string, message: string, logger: ICommerceDebugger) {
+export function publish(channel: Channel, topic: string, event: CloudEvent, logger: ICommerceDebugger) {
   logger.info(`[AMQP][producer] publishing message to topic: ${topic}`);
-  channel.publish(topic, '', Buffer.from(message));
+  channel.publish(topic, '#', Buffer.from(event.toString()));
 }

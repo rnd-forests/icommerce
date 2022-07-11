@@ -5,7 +5,9 @@
     "compile-libs": "lerna run compile --scope @lib/*",
     "rm": "rm -rf */*/dist && rm -rf */*/node_modules && rm -rf node_modules",
     "deps": "npm run rm && npm i && npm run compile-libs",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "migrate:all": "lerna run migrate:up --scope @icommerce/*",
+    "seed:all": "lerna run seed:all --scope @icommerce/*"
   },
   "workspaces": [
     "lib/*",

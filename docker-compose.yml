@@ -49,6 +49,8 @@ services:
     environment:
       - RABBITMQ_USERNAME=icommerce
       - RABBITMQ_PASSWORD=icommerce
+      - RABBITMQ_VM_MEMORY_HIGH_WATERMARK=0.8
+      - RABBITMQ_DISK_FREE_ABSOLUTE_LIMIT=5GB
     restart: always
     volumes:
       - 'rabbitmq_data:/bitnami/rabbitmq/mnesia'

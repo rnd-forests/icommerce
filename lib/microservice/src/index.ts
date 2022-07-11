@@ -42,7 +42,7 @@ export function Microservice(opts: MicroserviceInitOptions) {
     logger,
   } = opts;
 
-  logger.info(`INITIALIZING MICROSERVICE: ${serviceName}`);
+  logger.info(`[SERVER] initializing microservice: ${serviceName}`);
 
   const app = express();
   const server = new Server(app);
@@ -52,13 +52,13 @@ export function Microservice(opts: MicroserviceInitOptions) {
       logger.error(e);
     }
 
-    logger.info('SERVER PROCESS EXITING...');
+    logger.info('[SERVER] server process exiting...');
 
     const exitCode = _isError(e) ? 1 : 0;
 
     server.close((serverError: any) => {
       if (serverError) {
-        logger.error(serverError, 'SERVER ERROR');
+        logger.error(serverError, '[SERVER] server error');
       }
       serverExit()
         .then(() => process.exit(exitCode))
@@ -80,10 +80,9 @@ export function Microservice(opts: MicroserviceInitOptions) {
     app.options('*', cors({ credentials: true }));
   }
 
-  app.use(helmet());
-
-  app.get('/ping', (_req, res) => res.send('ok'));
-
+  /**
+   * This is a basic server to server authentication using API key.
+   */
   if (serverApiKey) {
     app.use((req, res, next) => {
       const token = req.get('Authorization-Server');
@@ -95,8 +94,9 @@ export function Microservice(opts: MicroserviceInitOptions) {
     });
   }
 
+  app.use(helmet());
+  app.get('/ping', (_req, res) => res.send('ok'));
   app.use(bodyParser.json({ limit: serverJsonLimit }));
-
   app.use(
     morgan('tiny', {
       stream: {
@@ -107,12 +107,16 @@ export function Microservice(opts: MicroserviceInitOptions) {
 
   function listen() {
     app.listen(serverPort, () => {
-      logger.info(`SERVER LISTENING | PORT: ${serverPort} | ENV: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
+      logger.info(
+        `[SERVER] server listening | port: ${serverPort} | env: ${isProduction ? 'production' : 'development'}`,
+      );
       serverListenCb();
 
       if (brokerUrl && brokerExchanges) {
         rabbitmq.connect(brokerUrl, logger).then(connection => {
-          rabbitmq.startProducer(connection, brokerExchanges, logger);
+          rabbitmq
+            .startProducer(connection, brokerExchanges, logger)
+            .then(channel => app.set('producer-channel', channel));
           rabbitmq.startConsumer(connection, brokerExchanges, logger, brokerConsumerHandler);
         });
       }
