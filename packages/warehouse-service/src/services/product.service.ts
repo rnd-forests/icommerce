@@ -6,3 +6,6 @@ export const getById = async (id?: Identifier): Promise<Product> => productRepos
 
 export const getAll = async (filter: T.Product.FetchProductsFilters): Promise<{ products: Product[]; total: number }> =>
   productRepository.fetchProducts(filter);
+
+export const reserveProductStocks = async (orderItems: T.Order.OrderItemSchema[]): Promise<boolean> =>
+  productRepository.reserveProductStocks(orderItems);

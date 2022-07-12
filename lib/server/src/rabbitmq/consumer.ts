@@ -29,16 +29,13 @@ export async function startConsumer(
     channel.bindQueue(queue, topic, '#');
   });
 
-  channel.consume(
-    queue,
-    message => {
-      logger.info('[AMQP][consumer] received message: ', stringifyMessage(message));
-      if (messageHandler && message) {
-        messageHandler(message);
-      }
-    },
-    { noAck: true },
-  );
+  channel.consume(queue, message => {
+    logger.info('[AMQP][consumer] received message: ', stringifyMessage(message));
+    if (messageHandler && message) {
+      messageHandler(message);
+      channel.ack(message);
+    }
+  });
 
   logger.info('[AMQP][consumer] started with topics:', topics.join(' | '));
 

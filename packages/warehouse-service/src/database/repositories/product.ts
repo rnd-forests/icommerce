@@ -1,5 +1,6 @@
 import _isUndefined from 'lodash/isUndefined';
 import { Sequelize, Identifier, Op, OrderItem } from 'sequelize';
+import { dbConnection } from '../../config';
 import Product from '../../models/product';
 import { getPaginationLimit } from '../util';
 
@@ -56,3 +57,34 @@ export const fetchProducts = async ({
 
   return { products, total };
 };
+
+// The stock reserving process here is quite naive, just for the demo.
+export const reserveProductStocks = async (orderItems: T.Order.OrderItemSchema[]): Promise<boolean> =>
+  dbConnection.transaction(async transaction => {
+    const productIds = orderItems.map(item => item.itemId);
+    const products = await Product.findAll({
+      where: { id: { [Op.in]: productIds } },
+      transaction,
+    });
+
+    // If some products is not available
+    if (products.length !== orderItems.length) {
+      return false;
+    }
+
+    // Checking product SKUs
+    /* eslint-disable no-restricted-syntax */
+    for (const product of products) {
+      const orderItem = orderItems.find(item => item.itemId === product.id);
+      if (orderItem && orderItem.quantity > product.sku) {
+        return false;
+      }
+    }
+
+    // Decrement SKUs
+    await Promise.all(
+      orderItems.map(item => Product.decrement({ sku: item.quantity }, { where: { id: item.itemId }, transaction })),
+    );
+
+    return true;
+  });

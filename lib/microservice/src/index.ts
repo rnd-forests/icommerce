@@ -113,11 +113,9 @@ export function Microservice(opts: MicroserviceInitOptions) {
       serverListenCb();
 
       if (brokerUrl && brokerExchanges) {
-        rabbitmq.connect(brokerUrl, logger).then(connection => {
-          rabbitmq
-            .startProducer(connection, brokerExchanges, logger)
-            .then(channel => app.set('producer-channel', channel));
-          rabbitmq.startConsumer(connection, brokerExchanges, logger, brokerConsumerHandler);
+        rabbitmq.connect(brokerUrl, logger).then(conn => {
+          rabbitmq.startProducer(conn, brokerExchanges, logger).then(channel => app.set('producer-channel', channel));
+          rabbitmq.startConsumer(conn, brokerExchanges, logger, brokerConsumerHandler);
         });
       }
 

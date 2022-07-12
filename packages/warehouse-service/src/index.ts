@@ -1,7 +1,8 @@
 import config from 'config';
+import { partial } from 'ramda';
 import { Message } from 'amqplib';
 import { Microservice } from '@lib/microservice';
-import { initPgConnection } from '@lib/server';
+import { initPgConnection, rabbitmq } from '@lib/server';
 import { logger, dbConnection } from './config';
 import { getProducts, getProductById } from './routes';
 import { handleEventMessage } from './domain-events';
@@ -13,9 +14,6 @@ const { app, listen } = Microservice({
   serverApiKey: config.get('server.apiKey'),
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
-  brokerUrl: config.get('amqp.connection'),
-  brokerExchanges: config.get<string>('amqp.exchanges').split('|'),
-  brokerConsumerHandler: async (message: Message) => handleEventMessage(message),
   serverListenCb: async () => {
     await initPgConnection(dbConnection, logger);
   },
@@ -29,4 +27,14 @@ const { app, listen } = Microservice({
 app.get('/v1/products', getProducts);
 app.get('/v1/products/:id', getProductById);
 
-listen();
+const initRabbitMQ = async () => {
+  const exchanges = config.get<string>('amqp.exchanges').split('|');
+  const connection = await rabbitmq.connect(config.get('amqp.connection'), logger);
+  const producerChannel = await rabbitmq.startProducer(connection, exchanges, logger);
+  const consumerHandler = partial(handleEventMessage, [producerChannel]) as (message: Message) => Promise<void>;
+  await rabbitmq.startConsumer(connection, exchanges, logger, consumerHandler);
+};
+
+initRabbitMQ()
+  .then(() => listen())
+  .catch(() => {});
