@@ -27,7 +27,6 @@ export const createOrder = middlewareAsync(async (req, res) => {
     });
 
     if (freshOrder) {
-      // Fire order:placed event to notify other services.
       const event = new CloudEvent({
         id: uuidv4(),
         type: ORDER_EVENTS.ORDER_PLACED,
