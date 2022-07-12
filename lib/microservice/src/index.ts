@@ -6,9 +6,7 @@ import morgan from 'morgan';
 import { Server } from 'http';
 import express from 'express';
 import bodyParser from 'body-parser';
-import { Message } from 'amqplib';
 import { ICommerceDebugger } from '@lib/common';
-import { rabbitmq } from '@lib/server';
 import _isError from 'lodash/isError';
 
 interface MicroserviceInitOptions {
@@ -20,9 +18,6 @@ interface MicroserviceInitOptions {
   serverListenCb: () => Promise<void>;
   serverExit: () => Promise<void>;
   serverJsonLimit: string;
-  brokerUrl?: string;
-  brokerExchanges?: string[];
-  brokerConsumerHandler?: (message: Message) => Promise<void>;
   logger: ICommerceDebugger;
 }
 
@@ -34,9 +29,6 @@ export function Microservice(opts: MicroserviceInitOptions) {
     serverPort,
     serverApiKey,
     serverJsonLimit,
-    brokerUrl,
-    brokerExchanges,
-    brokerConsumerHandler,
     serverListenCb,
     serverExit,
     logger,
@@ -111,13 +103,6 @@ export function Microservice(opts: MicroserviceInitOptions) {
         `[SERVER] server listening | port: ${serverPort} | env: ${isProduction ? 'production' : 'development'}`,
       );
       serverListenCb();
-
-      if (brokerUrl && brokerExchanges) {
-        rabbitmq.connect(brokerUrl, logger).then(conn => {
-          rabbitmq.startProducer(conn, brokerExchanges, logger).then(channel => app.set('producer-channel', channel));
-          rabbitmq.startConsumer(conn, brokerExchanges, logger, brokerConsumerHandler);
-        });
-      }
 
       if (process && process.send) {
         process.send('ready');
