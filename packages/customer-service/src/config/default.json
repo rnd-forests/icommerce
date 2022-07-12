@@ -1,0 +1,15 @@
+{
+  "serviceName": "customer-service",
+  "server": {
+    "apiKey": "11fc224e-0205-4cfa-a2d4-070b9607c2d1",
+    "port": 3003,
+    "jsonLimit": "5mb"
+  },
+  "database": {
+    "username": "customer_user",
+    "password": "customer_password",
+    "database": "customer",
+    "host": "127.0.0.1",
+    "port": 5436
+  }
+}

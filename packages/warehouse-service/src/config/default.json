@@ -1,0 +1,19 @@
+{
+  "serviceName": "warehouse-service",
+  "server": {
+    "apiKey": "",
+    "port": 3001,
+    "jsonLimit": "5mb"
+  },
+  "amqp": {
+    "connection": "amqp://icommerce:icommerce@localhost:5672",
+    "exchanges": "order:processing|order:error"
+  },
+  "database": {
+    "username": "warehouse_user",
+    "password": "warehouse_password",
+    "database": "warehouse",
+    "host": "127.0.0.1",
+    "port": 5435
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "serviceName": "order-processor-service",
+  "server": {
+    "apiKey": "",
+    "port": 3002,
+    "jsonLimit": "5mb"
+  },
+  "amqp": {
+    "connection": "amqp://icommerce:icommerce@localhost:5672",
+    "exchanges": "order:processing|order:error"
+  },
+  "customerService": {
+    "endpoint": "http://localhost:3003",
+    "apiKey": "11fc224e-0205-4cfa-a2d4-070b9607c2d1"
+  },
+  "database": {
+    "username": "order_processor_user",
+    "password": "order_processor_password",
+    "database": "order_processor",
+    "host": "127.0.0.1",
+    "port": 5437
+  }
+}

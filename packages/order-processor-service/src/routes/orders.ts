@@ -1,9 +1,10 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 import { Channel } from 'amqplib';
 import { ORDER_TOPICS, ORDER_EVENTS } from '@lib/common';
 import { middlewareAsync, rabbitmq } from '@lib/server';
 import { CloudEvent, Version } from 'cloudevents';
-import { logger, SERVICE_NAME } from '../config';
+import { logger } from '../config';
 import { createOrder as performOrderCreation } from '../services/order.service';
 import { Order, OrderItem } from '../models';
 
@@ -31,7 +32,7 @@ export const createOrder = middlewareAsync(async (req, res) => {
         id: uuidv4(),
         type: ORDER_EVENTS.ORDER_PLACED,
         specversion: '1.0' as Version,
-        source: `${SERVICE_NAME}:order:${order.id}`,
+        source: `${config.get<string>('serviceName')}:order:${order.id}`,
         time: new Date().toISOString(),
         datacontenttype: 'application/json',
         data: freshOrder.toJSON(),
