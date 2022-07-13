@@ -30,7 +30,7 @@
     "@types/ramda": "^0.28.15",
     "@types/uuid": "^8.3.4",
     "babel-loader": "8.2.5",
-    "core-js": "3.22.8",
+    "core-js": "^3.23.4",
     "eslint": "^8.16.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.0.0",
