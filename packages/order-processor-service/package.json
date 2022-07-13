@@ -5,8 +5,8 @@
   "sideEffects": false,
   "main": "index.js",
   "scripts": {
-    "dev": "DEBUG=order-processor-service:* NODE_CONFIG_DIR=./src/config npm run dev:compile",
-    "dev:compile": "rm -rf dist && webpack --config webpack.server.js --progress --watch",
+    "dev": "DEBUG=order-processor-service:* NODE_CONFIG_DIR=./src/config npm run --silent dev:compile",
+    "dev:compile": "rm -rf dist && webpack --config webpack.server.js --no-stats --watch",
     "type:check": "tsc --noEmit",
     "lint": "eslint --fix --color ./src",
     "migrate:up": "sequelize-cli db:migrate",
