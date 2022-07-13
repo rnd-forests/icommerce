@@ -3,6 +3,7 @@ import { Microservice } from '@lib/microservice';
 import { rabbitmq } from '@lib/server';
 import { logger } from './config';
 import { handleEventMessage } from './domain-events';
+import { Mongo } from './config/mongo';
 
 const { listen } = Microservice({
   serviceName: config.get('serviceName'),
@@ -11,12 +12,16 @@ const { listen } = Microservice({
   serverApiKey: config.get('server.apiKey'),
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
-  serverListenCb: async () => {
-    //
-  },
+  serverListenCb: async () => {},
   serverExit: async () => {
-    // await dbConnection.close();
-    // logger.info('Database connection closed.');
+    Mongo.client.close(mongoError => {
+      if (mongoError) {
+        logger.error('[MONGO] failed to close connection');
+      } else {
+        logger.info('[MONGO] connection closed');
+        process.exit(0);
+      }
+    });
   },
   logger,
 });
@@ -27,6 +32,9 @@ const initRabbitMQ = async () => {
   await rabbitmq.startConsumer(connection, exchanges, logger, handleEventMessage);
 };
 
-initRabbitMQ()
+Promise.all([initRabbitMQ(), Mongo.waitReady()])
   .then(() => listen())
-  .catch(() => {});
+  .catch(() => {
+    process.exitCode = 1;
+    setTimeout(() => process.exit(1), 1000);
+  });

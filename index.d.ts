@@ -72,5 +72,11 @@ declare global {
 
       interface StockReservedErrorEvent extends CloudEvent<StockReservedErrorEventData> {}
     }
+
+    namespace ActivityLog {
+      interface UserActivityLogSchema {
+        //
+      }
+    }
   }
 }

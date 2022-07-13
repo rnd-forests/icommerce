@@ -16,6 +16,10 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@lib/common": "*"
+    "@lib/common": "*",
+    "async-exit-hook": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/async-exit-hook": "^2.0.0"
   }
 }

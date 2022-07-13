@@ -8,5 +8,9 @@
   "amqp": {
     "connection": "amqp://icommerce:icommerce@localhost:5672",
     "exchanges": "user:activities"
+  },
+  "mongo": {
+    "database": "icommerce",
+    "auth": "mongodb://icommerce:icommerce@localhost:27017/admin"
   }
 }

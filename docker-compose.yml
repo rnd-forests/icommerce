@@ -43,6 +43,7 @@ services:
       - 27017:27017
     restart: always
     environment:
+      MONGO_INITDB_DATABASE: icommerce
       MONGO_INITDB_ROOT_USERNAME: icommerce
       MONGO_INITDB_ROOT_PASSWORD: icommerce
     volumes:
