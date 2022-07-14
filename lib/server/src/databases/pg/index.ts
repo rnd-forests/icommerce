@@ -23,8 +23,8 @@ export const createPgConnection = (logger: ICommerceDebugger): Sequelize =>
 export const initPgConnection = async (connection: Sequelize, logger: ICommerceDebugger) => {
   try {
     await connection.authenticate();
-    logger.info('[DATABASE] connection has been established.');
+    logger.info('[PostgreSQL] connection has been established.');
   } catch (e) {
-    logger.error('[DATABASE] unable to connect to the database', e);
+    logger.error('[PostgreSQL] unable to connect to the database', e);
   }
 };

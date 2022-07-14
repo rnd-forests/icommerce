@@ -16,7 +16,6 @@ const { app, listen } = Microservice({
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
   serverListenCb: async () => {
-    await initPgConnection(dbConnection, logger);
     defineModels();
   },
   serverExit: async () => {
@@ -47,6 +46,9 @@ const initRabbitMQ = async () => {
   });
 };
 
-initRabbitMQ()
+Promise.all([initRabbitMQ(), initPgConnection(dbConnection, logger)])
   .then(() => listen())
-  .catch(() => {});
+  .catch(() => {
+    process.exitCode = 1;
+    setTimeout(() => process.exit(1), 1000);
+  });

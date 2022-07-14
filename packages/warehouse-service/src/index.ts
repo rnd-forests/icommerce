@@ -14,9 +14,7 @@ const { app, listen } = Microservice({
   serverApiKey: config.get('server.apiKey'),
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
-  serverListenCb: async () => {
-    await initPgConnection(dbConnection, logger);
-  },
+  serverListenCb: async () => {},
   serverExit: async () => {
     await dbConnection.close();
     logger.info('Database connection closed.');
@@ -45,6 +43,9 @@ const initRabbitMQ = async () => {
   });
 };
 
-initRabbitMQ()
+Promise.all([initRabbitMQ(), initPgConnection(dbConnection, logger)])
   .then(() => listen())
-  .catch(() => {});
+  .catch(() => {
+    process.exitCode = 1;
+    setTimeout(() => process.exit(1), 1000);
+  });

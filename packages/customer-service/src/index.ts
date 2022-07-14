@@ -11,9 +11,7 @@ const { app, listen } = Microservice({
   serverApiKey: config.get('server.apiKey'),
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
-  serverListenCb: async () => {
-    await initPgConnection(dbConnection, logger);
-  },
+  serverListenCb: async () => {},
   serverExit: async () => {
     await dbConnection.close();
     logger.info('Database connection closed.');
@@ -24,4 +22,9 @@ const { app, listen } = Microservice({
 app.post('/v1/customers', createCustomer);
 app.get('/v1/customers/:id', getCustomerById);
 
-listen();
+Promise.all([initPgConnection(dbConnection, logger)])
+  .then(() => listen())
+  .catch(() => {
+    process.exitCode = 1;
+    setTimeout(() => process.exit(1), 1000);
+  });

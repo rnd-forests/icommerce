@@ -36,15 +36,14 @@ export async function startConsumer({
   const { queue } = await channel.assertQueue(queueName || '', { exclusive: true });
 
   topics.forEach(topic => {
-    logger.info(`[AMQP][consumer] binding queue for topic: ${topic}`);
+    logger.info(`[AMQP][consumer] binding queue [${queueName || ''}] for topic: ${topic}`);
     channel.bindQueue(queue, topic, '#');
   });
 
   channel.consume(queue, message => {
     logger.info('[AMQP][consumer] received message: ', stringifyMessage(message));
     if (messageHandler && message) {
-      messageHandler(message);
-      channel.ack(message);
+      messageHandler(message).then(() => channel.ack(message));
     }
   });
 
