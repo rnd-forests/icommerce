@@ -36,7 +36,7 @@ export const createOrder = middlewareAsync(async (req, res) => {
         datacontenttype: 'application/json',
         data: freshOrder.toJSON(),
       });
-      rabbitmq.publish(req.app.get('producer-channel') as Channel, ORDER_TOPICS.ORDER_PROCESSING, event, logger);
+      rabbitmq.publish(req.app.get('order-producer-channel') as Channel, ORDER_TOPICS.ORDER_PROCESSING, event, logger);
     }
 
     return res.json(freshOrder);

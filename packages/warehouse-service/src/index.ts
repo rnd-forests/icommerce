@@ -1,6 +1,6 @@
 import config from 'config';
 import { partial } from 'ramda';
-import { Message } from 'amqplib';
+import { Connection, Message } from 'amqplib';
 import { Microservice } from '@lib/microservice';
 import { initPgConnection, rabbitmq } from '@lib/server';
 import { logger, dbConnection } from './config';
@@ -25,22 +25,33 @@ const { app, listen } = Microservice({
 app.get('/v1/products', getProducts);
 app.get('/v1/products/:id', getProductById);
 
+const initOrderBroker = async (connection: Connection) => {
+  const topics = config.get<string>('amqp.orderExchanges').split('|');
+  const producer = await rabbitmq.startProducer(connection, topics, logger);
+  const consumerHandler = partial(handleEventMessage, [producer]) as (message: Message) => Promise<void>;
+  await rabbitmq.startConsumer({
+    connection,
+    topics,
+    logger,
+    queueName: 'queue:warehouse:orders',
+    messageHandler: consumerHandler,
+  });
+};
+
+const initUserActivityBroker = async (connection: Connection) => {
+  const topics = config.get<string>('amqp.userActivitiesExchanges').split('|');
+  const producer = await rabbitmq.startProducer(connection, topics, logger);
+  app.set('user-activity-producer-channel', producer);
+};
+
 const initRabbitMQ = async () => {
-  const exchanges = config.get<string>('amqp.exchanges').split('|');
   const connection = await rabbitmq.connect({
     url: config.get('amqp.connection'),
     connectionName: config.get('serviceName'),
     logger,
   });
-  const producerChannel = await rabbitmq.startProducer(connection, exchanges, logger);
-  const consumerHandler = partial(handleEventMessage, [producerChannel]) as (message: Message) => Promise<void>;
-  await rabbitmq.startConsumer({
-    connection,
-    topics: exchanges,
-    logger,
-    queueName: 'queue:warehouse:orders',
-    messageHandler: consumerHandler,
-  });
+
+  await Promise.all([initOrderBroker(connection), initUserActivityBroker(connection)]);
 };
 
 Promise.all([initRabbitMQ(), initPgConnection(dbConnection, logger)])

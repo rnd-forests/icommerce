@@ -7,7 +7,8 @@
   },
   "amqp": {
     "connection": "amqp://icommerce:icommerce@localhost:5672",
-    "exchanges": "order:processing|order:error"
+    "orderExchanges": "order:processing|order:error",
+    "userActivitiesExchanges": "user:activities"
   },
   "database": {
     "username": "warehouse_user",

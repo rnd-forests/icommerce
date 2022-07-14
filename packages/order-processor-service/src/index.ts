@@ -1,6 +1,6 @@
 import config from 'config';
 import { partial } from 'ramda';
-import { Message } from 'amqplib';
+import { Connection, Message } from 'amqplib';
 import { Microservice } from '@lib/microservice';
 import { initPgConnection, rabbitmq } from '@lib/server';
 import { logger, dbConnection } from './config';
@@ -27,23 +27,34 @@ const { app, listen } = Microservice({
 
 app.post('/v1/orders', createOrder);
 
+const initOrderBroker = async (connection: Connection) => {
+  const topics = config.get<string>('amqp.orderExchanges').split('|');
+  const producer = await rabbitmq.startProducer(connection, topics, logger);
+  app.set('order-producer-channel', producer);
+
+  const consumerHandler = partial(handleEventMessage, [producer]) as (message: Message) => Promise<void>;
+  await rabbitmq.startConsumer({
+    connection,
+    topics,
+    logger,
+    queueName: 'queue:order-processor:orders',
+    messageHandler: consumerHandler,
+  });
+};
+
+const initUserActivityBroker = async (connection: Connection) => {
+  const topics = config.get<string>('amqp.userActivitiesExchanges').split('|');
+  return rabbitmq.startProducer(connection, topics, logger);
+};
+
 const initRabbitMQ = async () => {
-  const exchanges = config.get<string>('amqp.exchanges').split('|');
   const connection = await rabbitmq.connect({
     url: config.get('amqp.connection'),
     connectionName: config.get('serviceName'),
     logger,
   });
-  const producerChannel = await rabbitmq.startProducer(connection, exchanges, logger);
-  app.set('producer-channel', producerChannel);
-  const consumerHandler = partial(handleEventMessage, [producerChannel]) as (message: Message) => Promise<void>;
-  await rabbitmq.startConsumer({
-    connection,
-    topics: exchanges,
-    logger,
-    queueName: 'queue:order-processor:orders',
-    messageHandler: consumerHandler,
-  });
+
+  await Promise.all([initOrderBroker(connection), initUserActivityBroker(connection)]);
 };
 
 Promise.all([initRabbitMQ(), initPgConnection(dbConnection, logger)])

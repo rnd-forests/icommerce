@@ -14,3 +14,5 @@ TODO
 - authentication for order api??
 - cloud events, message format
 - NX graphq
+- rabittmq structure (channels, exchanges, queue, etc)
+- dev env (OS)
