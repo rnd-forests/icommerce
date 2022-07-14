@@ -30,11 +30,21 @@ app.post('/v1/orders', createOrder);
 
 const initRabbitMQ = async () => {
   const exchanges = config.get<string>('amqp.exchanges').split('|');
-  const connection = await rabbitmq.connect(config.get('amqp.connection'), logger);
+  const connection = await rabbitmq.connect({
+    url: config.get('amqp.connection'),
+    connectionName: config.get('serviceName'),
+    logger,
+  });
   const producerChannel = await rabbitmq.startProducer(connection, exchanges, logger);
   app.set('producer-channel', producerChannel);
   const consumerHandler = partial(handleEventMessage, [producerChannel]) as (message: Message) => Promise<void>;
-  await rabbitmq.startConsumer(connection, exchanges, logger, consumerHandler);
+  await rabbitmq.startConsumer({
+    connection,
+    topics: exchanges,
+    logger,
+    queueName: 'queue:order-processor:orders',
+    messageHandler: consumerHandler,
+  });
 };
 
 initRabbitMQ()

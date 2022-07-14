@@ -28,8 +28,18 @@ const { listen } = Microservice({
 
 const initRabbitMQ = async () => {
   const exchanges = config.get<string>('amqp.exchanges').split('|');
-  const connection = await rabbitmq.connect(config.get('amqp.connection'), logger);
-  await rabbitmq.startConsumer(connection, exchanges, logger, handleEventMessage);
+  const connection = await rabbitmq.connect({
+    url: config.get('amqp.connection'),
+    connectionName: config.get('serviceName'),
+    logger,
+  });
+  await rabbitmq.startConsumersForGivenQueue(3, {
+    connection,
+    topics: exchanges,
+    logger,
+    queueName: 'queue:activity-log:user:activities',
+    messageHandler: handleEventMessage,
+  });
 };
 
 Promise.all([initRabbitMQ(), Mongo.waitReady()])

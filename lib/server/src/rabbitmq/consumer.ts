@@ -9,20 +9,31 @@ function stringifyMessage(message: Message | null) {
   return JSON.stringify({ ...message, content });
 }
 
-export async function startConsumer(
-  connection: Connection,
-  topics: string[],
-  logger: ICommerceDebugger,
-  messageHandler?: (message: Message) => Promise<void>,
-): Promise<Channel> {
+interface ConsumerConfig {
+  connection: Connection;
+  topics: string[];
+  logger: ICommerceDebugger;
+  queueName?: string;
+  prefetch?: number;
+  messageHandler?: (message: Message) => Promise<void>;
+}
+
+export async function startConsumer({
+  connection,
+  topics,
+  logger,
+  queueName,
+  prefetch,
+  messageHandler,
+}: ConsumerConfig): Promise<Channel> {
   const channel = await connection.createChannel();
   channel.on('error', err => logger.error('[AMQP][consumer] channel error', err));
   channel.on('close', () => logger.error('[AMQP][consumer] channel closed'));
-  channel.prefetch(10);
+  channel.prefetch(prefetch || 10);
 
   await Promise.all(topics.map(topic => channel.assertExchange(topic, 'topic', { durable: true })));
 
-  const { queue } = await channel.assertQueue('', { exclusive: true });
+  const { queue } = await channel.assertQueue(queueName || '', { exclusive: true });
 
   topics.forEach(topic => {
     logger.info(`[AMQP][consumer] binding queue for topic: ${topic}`);
@@ -40,4 +51,12 @@ export async function startConsumer(
   logger.info('[AMQP][consumer] started with topics:', topics.join(' | '));
 
   return channel;
+}
+
+export async function startConsumersForGivenQueue(count: number, config: ConsumerConfig): Promise<Channel[]> {
+  return Promise.all(
+    Array(count)
+      .fill(null)
+      .map(() => startConsumer(config)),
+  );
 }
