@@ -60,6 +60,8 @@ declare global {
 
       interface OrderPlacedEvent extends CloudEvent<OrderPlacedEventData> {}
 
+      interface UserPlacedOrderEvent extends OrderPlacedEvent {}
+
       interface StockReservedEventData {
         orderId: string;
       }

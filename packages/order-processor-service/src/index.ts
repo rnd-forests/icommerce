@@ -44,7 +44,8 @@ const initOrderBroker = async (connection: Connection) => {
 
 const initUserActivityBroker = async (connection: Connection) => {
   const topics = config.get<string>('amqp.userActivitiesExchanges').split('|');
-  return rabbitmq.startProducer(connection, topics, logger);
+  const producer = await rabbitmq.startProducer(connection, topics, logger);
+  app.set('user-activity-producer-channel', producer);
 };
 
 const initRabbitMQ = async () => {
