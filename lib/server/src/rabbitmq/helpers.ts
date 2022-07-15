@@ -5,7 +5,7 @@ export const constructEvent = <T>(
   eventType: string,
   source: string,
   data: T,
-  extensions: { [key: string]: unknown } = {},
+  metadata: { [key: string]: unknown } = {},
 ): CloudEvent<T> =>
   new CloudEvent<T>({
     id: uuidv4(),
@@ -15,5 +15,5 @@ export const constructEvent = <T>(
     time: new Date().toISOString(),
     datacontenttype: 'application/json',
     data,
-    ...extensions,
+    metadata,
   });

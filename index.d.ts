@@ -6,6 +6,10 @@ import { Order as OrderModel, OrderItem as OrderItemModel } from '@icommerce/ord
 
 declare global {
   namespace T {
+    interface ObjectAny {
+      [key: string]: any;
+    }
+
     namespace Product {
       interface ProductSchema extends InferAttributes<ProductModel> {}
 
@@ -78,9 +82,8 @@ declare global {
     namespace ActivityLog {
       interface UserActivityLogSchema {
         type: string;
-        anonymousUserId: string;
+        userId: string;
         payload: T.Events.UserPlacedOrderEvent;
-        requestInfo: { [key: string]: any };
       }
     }
   }

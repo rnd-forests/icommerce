@@ -7,8 +7,7 @@ async function handleOrderPlacedEvent(event: T.Events.UserPlacedOrderEvent): Pro
   await DBServices.userActivities.insert({
     payload: event,
     type: event.type,
-    anonymousUserId: event.anonymoususer as string,
-    requestInfo: (event.request || {}) as { [key: string]: any },
+    userId: (event.metadata as T.ObjectAny).userid as string,
   });
 }
 

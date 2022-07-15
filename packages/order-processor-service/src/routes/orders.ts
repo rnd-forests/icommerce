@@ -31,7 +31,7 @@ const fireEvents = (order: Order, req: Request) => {
       USER_ACTIVITY_EVENTS.USER_ORDER_PLACING,
       eventSource,
       order.toJSON(),
-      { anonymoususer: id, request: requestInfo },
+      { userid: id, requestinfo: requestInfo },
     ),
     logger,
   );
