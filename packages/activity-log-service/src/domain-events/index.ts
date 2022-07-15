@@ -3,7 +3,9 @@ import { ACTIVITY_TOPICS, USER_ACTIVITY_EVENTS } from '@lib/common';
 import { logger } from '../config';
 import { DBServices } from '../database';
 
-async function handleOrderPlacedEvent(event: T.Events.UserPlacedOrderEvent): Promise<void> {
+async function handleUserActivityEvent(
+  event: T.Events.UserPlacedOrderEvent | T.Events.UserViewedProductEvent,
+): Promise<void> {
   await DBServices.userActivities.insert({
     payload: event,
     type: event.type,
@@ -18,7 +20,11 @@ export async function handleEventMessage(message: Message) {
 
   if (topic === ACTIVITY_TOPICS.USER_ACTIVITIES) {
     if (event.type === USER_ACTIVITY_EVENTS.USER_ORDER_PLACING) {
-      await handleOrderPlacedEvent(event as T.Events.UserPlacedOrderEvent);
+      await handleUserActivityEvent(event as T.Events.UserPlacedOrderEvent);
+    }
+
+    if (event.type === USER_ACTIVITY_EVENTS.USER_PRODUCT_VIEWING) {
+      await handleUserActivityEvent(event as T.Events.UserViewedProductEvent);
     }
   }
 

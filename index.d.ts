@@ -66,6 +66,8 @@ declare global {
 
       interface UserPlacedOrderEvent extends OrderPlacedEvent {}
 
+      interface UserViewedProductEvent extends CloudEvent<T.Product.ProductSchema> {}
+
       interface StockReservedEventData {
         orderId: string;
       }
@@ -83,7 +85,7 @@ declare global {
       interface UserActivityLogSchema {
         type: string;
         userId: string;
-        payload: T.Events.UserPlacedOrderEvent;
+        payload: T.Events.UserPlacedOrderEvent | T.Events.UserViewedProductEvent;
       }
     }
   }

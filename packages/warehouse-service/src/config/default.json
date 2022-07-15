@@ -16,5 +16,8 @@
     "database": "warehouse",
     "host": "127.0.0.1",
     "port": 5435
+  },
+  "anonymousId": {
+    "secret": "81b515df-b3ae-468f-9392-b844f4112d35"
   }
 }
