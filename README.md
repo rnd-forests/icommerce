@@ -142,3 +142,180 @@ Some of open-source packages used in project:
 - [got](https://www.npmjs.com/package/got): an HTTP client that handles communication between services using request-response communication.
 - [sequelize](https://www.npmjs.com/package/sequelize): an ORM for PostgreSQL. This package will be used to perform most of the queries to our relational databases.
 - [yup](https://www.npmjs.com/package/yup): validate request data using schema validation.
+
+### API Endpoints
+
+Postman Collection: https://www.getpostman.com/collections/24daeb7f7e1b5dfe4377
+
+#### Get Product Detail
+
+```bash
+curl --location --request GET 'http://localhost:3001/v1/products/6e7f704d-4f80-4fe0-9de5-46ff15d2fc11'
+```
+Sample response:
+
+```json
+{
+  "id": "6e7f704d-4f80-4fe0-9de5-46ff15d2fc11",
+  "name": "Elegant Fantastic Metal Pizza",
+  "price": "699.00",
+  "branch": "Soft",
+  "color": "maroon",
+  "sku": 3,
+  "createdAt": "1999-04-22T03:33:56.893Z",
+  "updatedAt": "2030-09-26T12:07:28.229Z"
+}
+```
+
+#### Fetch, Search and Filter Products
+
+```bash
+curl --location --request GET 'http://localhost:3001/v1/products?search=elegant&filter=color:maroon,branch:Soft&sortBy=createdAt:desc,name:asc&limit=2&offset=0'
+```
+
+Sample response:
+
+```json
+{
+  "products": [
+    {
+      "id": "4b2c535c-a10d-40e5-9e66-f9b1ce2edd3b",
+      "name": "Elegant Fantastic Frozen Pants",
+      "price": "112.00",
+      "branch": "Soft",
+      "color": "maroon",
+      "sku": 43,
+      "createdAt": "2079-07-14T01:37:24.085Z",
+      "updatedAt": "2029-01-12T06:20:02.603Z"
+    },
+    {
+      "id": "6e7f704d-4f80-4fe0-9de5-46ff15d2fc11",
+      "name": "Elegant Fantastic Metal Pizza",
+      "price": "699.00",
+      "branch": "Soft",
+      "color": "maroon",
+      "sku": 3,
+      "createdAt": "1999-04-22T03:33:56.893Z",
+      "updatedAt": "2030-09-26T12:07:28.229Z"
+    }
+  ],
+  "total": 3
+}
+```
+
+Request queries:
+
+- `search`: match products by name, branch and color using fulltext search provided by PostgreSQL.
+- `filter`: a comma-separated list of filters in the form `<attribute>:<value>`. Note that, by conventions, `<attribute>` should be in model attributes. Invalid attributes will be ignored.
+- `sortBy`: a comma-separated list of sortings in the form `<attribute>:<direction>`. Note that, by conventions, `<attribute>` should be in model attributes. `<direction>` can be either `asc` or `desc`.
+- `limit`, `offset`: these query parameters are used to paginate results.
+
+#### Find or Create Customer
+
+```bash
+curl --location --request POST 'http://localhost:3003/v1/customers' \
+--header 'Authorization-Server: 11fc224e-0205-4cfa-a2d4-070b9607c2d1' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "firstName": "Vinh",
+    "lastName": "Nguyen",
+    "phone": "+843496096981"
+}'
+```
+
+Sample response:
+
+```json
+{
+  "id": "1a799c12-7ede-4bf0-8507-34fa92b67492",
+  "firstName": "Vinh",
+  "lastName": "Nguyen",
+  "phone": "+843496096981",
+  "updatedAt": "2022-07-15T16:00:21.116Z",
+  "createdAt": "2022-07-15T16:00:21.116Z"
+}
+```
+
+#### Fetch Customer Detail
+
+```bash
+curl --location --request GET 'http://localhost:3003/v1/customers/58225157-b45d-4944-9099-ed1a2d737847' \
+--header 'Authorization-Server: 11fc224e-0205-4cfa-a2d4-070b9607c2d1'
+```
+
+Sample response:
+
+```json
+{
+  "id": "58225157-b45d-4944-9099-ed1a2d737847",
+  "firstName": "Emie",
+  "lastName": "Fritsch",
+  "phone": "387.753.5964",
+  "createdAt": "2067-05-23T07:50:19.214Z",
+  "updatedAt": "2040-11-23T15:19:50.887Z"
+}
+```
+
+#### Create New Order
+
+```bash
+curl --location --request POST 'http://localhost:3002/v1/orders' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "customer": {
+    "firstName": "Vinh",
+    "lastName": "Nguyen",
+    "phone": "+84349609698"
+  },
+  "items": [
+    {
+      "id": "314fb0ac-5e5d-4ca3-ace4-6465620b6eb7",
+      "quantity": 2,
+      "price": 15
+    },
+    {
+      "id": "46bfcb7b-d769-45fb-8d8c-2b5079458e95",
+      "quantity": 3,
+      "price": 25
+    }
+  ]
+}'
+```
+
+Sample response:
+
+```json
+{
+  "id": "bac8f811-ce33-494c-a3bf-9f0ae73176cf",
+  "customerId": "4ca06e5f-eb3c-4e20-ba03-338a2d0befd5",
+  "status": "new",
+  "total": "105.00",
+  "firstName": "Vinh",
+  "lastName": "Nguyen",
+  "phone": "+84349609698",
+  "createdAt": "2022-07-15T16:02:29.915Z",
+  "updatedAt": "2022-07-15T16:02:29.915Z",
+  "orderItems": [
+    {
+      "id": "ec51f23c-e006-458b-957d-163ea1d0f4a8",
+      "orderId": "bac8f811-ce33-494c-a3bf-9f0ae73176cf",
+      "itemId": "314fb0ac-5e5d-4ca3-ace4-6465620b6eb7",
+      "price": "15.00",
+      "quantity": 2,
+      "createdAt": "2022-07-15T16:02:29.921Z",
+      "updatedAt": "2022-07-15T16:02:29.921Z"
+    },
+    {
+      "id": "0c6d590d-016f-4878-889e-251cd12f98a2",
+      "orderId": "bac8f811-ce33-494c-a3bf-9f0ae73176cf",
+      "itemId": "46bfcb7b-d769-45fb-8d8c-2b5079458e95",
+      "price": "25.00",
+      "quantity": 3,
+      "createdAt": "2022-07-15T16:02:29.921Z",
+      "updatedAt": "2022-07-15T16:02:29.921Z"
+    }
+  ]
+}
+```
+
+Note that, this API only handle the initial state of the order. Other order state transitions will be handled through event collaboration between microservices.
