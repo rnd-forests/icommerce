@@ -1,5 +1,25 @@
 ## iCommerce
 
+- installation guide: setup script, docker, docker compose
+- authentication for order api??
+- cloud events, message format
+- NX graphq
+- rabittmq structure (channels, exchanges, queue, etc)
+- dev env (OS)
+- rate limit for order placed API???
+
+### High Level Architecture
+
+### Database Design
+
+### Development Principles and Patterns
+
+#### Microservice Modeling
+TODO - DDD, CQRS, Event Sourcing, Domain Driven Design
+
+#### Microservice Communication Styles
+TODO
+
 #### Order Processing Event Collaboration
 
 ![](./docs/images/order_event_collaboration.jpg)
@@ -8,15 +28,12 @@
 
 ![](docs/images/order_processing_message_broker.jpg)
 
+#### Microservice Worflow - SAGA Pattern
 TODO
 
-- installation guide: setup script, docker, docker compose
-- authentication for order api??
-- cloud events, message format
-- NX graphq
-- rabittmq structure (channels, exchanges, queue, etc)
-- dev env (OS)
-- rate limit for order placed API???
+#### Microservice Security
+
+#### Microservice Testing
 
 
 ### Installation Guides
