@@ -106,6 +106,14 @@ The `lib` directory contains shared codes and libraries that will be used by our
 - `server`: defines the boilerplat for server common setups which include: database connections (PostgreSQL and MongoDB), Express.js middlewares, RabbitMQ connector/producer/consumer.
 - `webpack`: defines the boilerplate for webpack configuration the will be used and extended by microservices.
 
+
+The `packages` directory contains the logic for all of our microservices. We define four microservices:
+
+- `warehouse-service`: this microservice is used to manage products and provide API endpoints to search, filter products as well as fetch product details. Thoose API endpoints will be used by our clients.
+- `order-processor-service`: as the name stated, this microservice is used to process orders. It exposes a single API endpoint `/api/v1/orders` to accept order from clients.
+- `customer-service`: this microservice is used to manage customers. As we don't have authentication logic, it acts as an auxiliary microservice by provides internal APIs that allow fetching, creating new customers based on the information provided by clients throught `order-processor-service`.
+- `activity-log-service`: this microservice is used to collect logs about all activities that happen in the system. In the scope of this project, it collects user activities (placing orders, searching products, viewing products). This microservice doesn't expose any API, it receives events from other microservices and write them to MongoDB database.
+
 Here is a graph that demonstrates the relationship between packages in project.
 
 ![](docs/images/packages-graph.png)
