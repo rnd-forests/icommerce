@@ -20,7 +20,7 @@ TODO
 
 
 ### Installation Guides
-This project is written in Node.js, so before you can use it, you need to install Node.js
+This project is written in Node.js, so before you can use it, you need to install Node.js.
 Make sure you have Node.js `v16` installed on your computer.
 
 - Node.js: `v.16.x` (tested with `v16.15.0`)
@@ -53,3 +53,19 @@ Our microservices are located in `packages` directory. Each microservice has a `
 - `order-processor-service`: `3002`
 - `customer-service`: `3003`
 - `activity-log-service`: `3004`
+
+### Project Structure, Frameworks and Libraries
+
+Here're are the list of tools and frameworks used in this project:
+
+- [Lerna](https://lerna.js.org): a build system for managing multiple JavaScript packages from the same repository. In the context of our application, it's used for managing microservices and shared libraries.
+- [Express](https://expressjs.com/): a web framework for Node.js. It's used for building backend APIs for our microservices.
+- [TypeScript](https://www.typescriptlang.org/): a compiler for JavaScript. Our codebase written in TypeScript.
+- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) for running local development containers (most of them are for data storage).
+- [ESLint](https://eslint.org/): to find and fix problems in JavaScript (TypeScript) code.
+- [Prettier](https://prettier.io/): to format our code.
+- [Babel](https://babeljs.io/): to transplie our codes that use next generation JavaScript syntax.
+- [Webpack](https://webpack.js.org/): to bundle our codebase.
+- [PostgreSQL](https://www.postgresql.org/): the main database for some of our microservices: `warehouse`, `order-processor`, and `customer`.
+- [MongoDB](https://www.mongodb.com/): to store our activity logs in `activity-log` microservice.
+- [RabbitMQ](https://www.rabbitmq.com/): this message broker is used to convey messages between microservices.
