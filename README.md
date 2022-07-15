@@ -56,6 +56,7 @@ Our microservices are located in `packages` directory. Each microservice has a `
 
 ### Project Structure, Frameworks and Libraries
 
+#### Frameworks and Tools
 Here're are the list of tools and frameworks used in this project:
 
 - [Lerna](https://lerna.js.org): a build system for managing multiple JavaScript packages from the same repository. In the context of our application, it's used for managing microservices and shared libraries.
@@ -69,3 +70,13 @@ Here're are the list of tools and frameworks used in this project:
 - [PostgreSQL](https://www.postgresql.org/): the main database for some of our microservices: `warehouse`, `order-processor`, and `customer`.
 - [MongoDB](https://www.mongodb.com/): to store our activity logs in `activity-log` microservice.
 - [RabbitMQ](https://www.rabbitmq.com/): this message broker is used to convey messages between microservices.
+
+#### Open-source Packages
+Some of open-source packages used in project:
+
+- [debug](https://www.npmjs.com/package/debug): handle logs and debugging for services.
+- [cloudevents](https://www.npmjs.com/package/cloudevents): CloudEvents SDK for JavaScript, all events in project will follow the format provided by this standard. More information can be found at [CloudEvents](https://cloudevents.io/).
+- [config](https://www.npmjs.com/package/config): manage application configurations.
+- [got](https://www.npmjs.com/package/got): an HTTP client that handles communication between services using request-response communication.
+- [sequelize](https://www.npmjs.com/package/sequelize): an ORM for PostgreSQL. This package will be used to perform most of the queries to our relational databases.
+- [yup](https://www.npmjs.com/package/yup): validate request data using schema validation.
