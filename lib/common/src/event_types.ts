@@ -8,10 +8,9 @@ export const ACTIVITY_TOPICS = {
 };
 
 export const USER_ACTIVITY_EVENTS = {
-  USER_PRODUCT_SEARCHING: 'user:product:searching',
-  USER_PRODUCT_FILTERING: 'user:product:filtering',
-  USER_PRODUCT_VIEWING: 'user:product:viewing',
-  USER_ORDER_PLACING: 'user:order:placing',
+  USER_ORDER_PLACED: 'user:order:placed',
+  USER_PRODUCT_VIEWED: 'user:product:viewed',
+  USER_PRODUCT_SEARCH_FILTER: 'user:product:searching:filtering',
 };
 
 export const ORDER_EVENTS = {

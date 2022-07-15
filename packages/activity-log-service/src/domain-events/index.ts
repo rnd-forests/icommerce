@@ -4,7 +4,7 @@ import { logger } from '../config';
 import { DBServices } from '../database';
 
 async function handleUserActivityEvent(
-  event: T.Events.UserPlacedOrderEvent | T.Events.UserViewedProductEvent,
+  event: T.Events.UserPlacedOrderEvent | T.Events.UserViewedProductEvent | T.Events.UserSearchFilterProductsEvent,
 ): Promise<void> {
   await DBServices.userActivities.insert({
     payload: event,
@@ -19,12 +19,16 @@ export async function handleEventMessage(message: Message) {
   logger.info(`handling ${event.type} event, event id: ${event.id}`);
 
   if (topic === ACTIVITY_TOPICS.USER_ACTIVITIES) {
-    if (event.type === USER_ACTIVITY_EVENTS.USER_ORDER_PLACING) {
+    if (event.type === USER_ACTIVITY_EVENTS.USER_ORDER_PLACED) {
       await handleUserActivityEvent(event as T.Events.UserPlacedOrderEvent);
     }
 
-    if (event.type === USER_ACTIVITY_EVENTS.USER_PRODUCT_VIEWING) {
+    if (event.type === USER_ACTIVITY_EVENTS.USER_PRODUCT_VIEWED) {
       await handleUserActivityEvent(event as T.Events.UserViewedProductEvent);
+    }
+
+    if (event.type === USER_ACTIVITY_EVENTS.USER_PRODUCT_SEARCH_FILTER) {
+      await handleUserActivityEvent(event as T.Events.UserSearchFilterProductsEvent);
     }
   }
 

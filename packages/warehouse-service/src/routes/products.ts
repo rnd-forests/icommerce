@@ -16,7 +16,7 @@ export const getProductById = middlewareAsync(async (req, res) => {
       req.app.get('user-activity-producer-channel') as Channel,
       ACTIVITY_TOPICS.USER_ACTIVITIES,
       rabbitmq.constructEvent<T.Product.ProductSchema>(
-        USER_ACTIVITY_EVENTS.USER_PRODUCT_VIEWING,
+        USER_ACTIVITY_EVENTS.USER_PRODUCT_VIEWED,
         eventSource,
         product.toJSON(),
         { userid: userId, requestinfo: requestInfo },
@@ -32,7 +32,26 @@ export const getProductById = middlewareAsync(async (req, res) => {
 
 export const getProducts = middlewareAsync(async (req, res) => {
   try {
-    return res.json(await getAll(req.query));
+    const results = await getAll(req.query);
+
+    const eventSource = `${config.get<string>('serviceName')}:products`;
+    const { id: userId, requestInfo } = genAnonymousUserIdFromRequest(config.get<string>('anonymousId.secret'), req);
+    rabbitmq.publish(
+      req.app.get('user-activity-producer-channel') as Channel,
+      ACTIVITY_TOPICS.USER_ACTIVITIES,
+      rabbitmq.constructEvent<T.Events.UserSearchFilterProductsEventData>(
+        USER_ACTIVITY_EVENTS.USER_PRODUCT_SEARCH_FILTER,
+        eventSource,
+        {
+          query: req.query,
+          matchedProductIds: results.products.map(product => product.id),
+        },
+        { userid: userId, requestinfo: requestInfo },
+      ),
+      logger,
+    );
+
+    return res.json(results);
   } catch (err) {
     return res.status(404).json({ message: (err as Error).message });
   }

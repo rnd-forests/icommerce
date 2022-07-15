@@ -28,7 +28,7 @@ const fireEvents = (order: Order, req: Request) => {
     req.app.get('user-activity-producer-channel') as Channel,
     ACTIVITY_TOPICS.USER_ACTIVITIES,
     rabbitmq.constructEvent<T.Events.OrderPlacedEventData>(
-      USER_ACTIVITY_EVENTS.USER_ORDER_PLACING,
+      USER_ACTIVITY_EVENTS.USER_ORDER_PLACED,
       eventSource,
       order.toJSON(),
       { userid: id, requestinfo: requestInfo },
