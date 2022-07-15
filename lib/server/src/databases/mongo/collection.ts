@@ -25,11 +25,7 @@ import {
 } from 'mongodb';
 import { Readable } from 'stream';
 
-interface ObjectAny {
-  [key: string]: any;
-}
-
-interface MongoCollection<S, Q = Filter<S>> {
+export interface MongoCollection<S, Q = Filter<S>> {
   find: (query: Q, projection?: Document, opts?: FindOptions) => Promise<WithId<S>[]>;
   findOne: (query: Q, projection?: Document, opts?: FindOptions) => Promise<WithId<S> | null>;
   findCursor: (query: Q, projection?: Document, opts?: FindOptions) => FindCursor<WithId<S>>;
@@ -42,7 +38,12 @@ interface MongoCollection<S, Q = Filter<S>> {
   insertMany: (items: OptionalUnlessRequiredId<S>[], opts?: BulkWriteOptions) => Promise<InsertManyResult<S>>;
   update: (query: Q, update: UpdateFilter<S>, opts?: UpdateOptions) => Promise<UpdateResult>;
   updateBulk: (
-    updates: Array<{ find: Q; update: ObjectAny }>,
+    updates: Array<{
+      find: Q;
+      update: {
+        [key: string]: any;
+      };
+    }>,
     type: 'ordered' | 'unordered',
   ) => Promise<BulkWriteResult>;
   replaceOne: (query: Q, item: S, opts?: ReplaceOptions) => Promise<UpdateResult | Document>;

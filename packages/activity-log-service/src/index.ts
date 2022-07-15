@@ -4,6 +4,7 @@ import { rabbitmq } from '@lib/server';
 import { logger } from './config';
 import { handleEventMessage } from './domain-events';
 import { Mongo } from './config/mongo';
+import { DBServices } from './database';
 
 const { listen } = Microservice({
   serviceName: config.get('serviceName'),
@@ -12,7 +13,12 @@ const { listen } = Microservice({
   serverApiKey: config.get('server.apiKey'),
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
-  serverListenCb: async () => {},
+  serverListenCb: async () => {
+    const DB = await Mongo.getDB();
+    if (DB) {
+      DBServices.init(DB);
+    }
+  },
   serverExit: async () => {
     Mongo.client.close(mongoError => {
       if (mongoError) {

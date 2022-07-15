@@ -1,24 +1,41 @@
 import config from 'config';
-import { v4 as uuidv4 } from 'uuid';
+import { Request } from 'express';
 import { Channel } from 'amqplib';
-import { ORDER_TOPICS, ORDER_EVENTS, ACTIVITY_TOPICS, USER_ACTIVITY_EVENTS } from '@lib/common';
+import {
+  ORDER_TOPICS,
+  ORDER_EVENTS,
+  ACTIVITY_TOPICS,
+  USER_ACTIVITY_EVENTS,
+  genAnonymousUserIdFromRequest,
+} from '@lib/common';
 import { middlewareAsync, rabbitmq } from '@lib/server';
-import { CloudEvent, Version } from 'cloudevents';
 import { logger } from '../config';
 import { createOrder as performOrderCreation } from '../services/order.service';
 import { Order, OrderItem } from '../models';
 
-const constructOrderEvent = (order: Order, eventType: string): CloudEvent<T.Events.OrderPlacedEventData> =>
-  new CloudEvent<T.Events.OrderPlacedEventData>({
-    id: uuidv4(),
-    type: eventType,
-    specversion: '1.0' as Version,
-    source: `${config.get<string>('serviceName')}:order:${order.id}`,
-    time: new Date().toISOString(),
-    datacontenttype: 'application/json',
-    // @ts-ignore
-    data: order.toJSON(),
-  });
+const fireEvents = (order: Order, req: Request) => {
+  const eventSource = `${config.get<string>('serviceName')}:order:${order.id}`;
+
+  rabbitmq.publish(
+    req.app.get('order-producer-channel') as Channel,
+    ORDER_TOPICS.ORDER_PROCESSING,
+    rabbitmq.constructEvent<T.Events.OrderPlacedEventData>(ORDER_EVENTS.ORDER_PLACED, eventSource, order.toJSON()),
+    logger,
+  );
+
+  const { id, requestInfo } = genAnonymousUserIdFromRequest(config.get<string>('anonymousId.secret'), req);
+  rabbitmq.publish(
+    req.app.get('user-activity-producer-channel') as Channel,
+    ACTIVITY_TOPICS.USER_ACTIVITIES,
+    rabbitmq.constructEvent<T.Events.OrderPlacedEventData>(
+      USER_ACTIVITY_EVENTS.USER_ORDER_PLACING,
+      eventSource,
+      order.toJSON(),
+      { anonymoususer: id, request: requestInfo },
+    ),
+    logger,
+  );
+};
 
 export const createOrder = middlewareAsync(async (req, res) => {
   try {
@@ -39,18 +56,7 @@ export const createOrder = middlewareAsync(async (req, res) => {
     });
 
     if (freshOrder) {
-      rabbitmq.publish(
-        req.app.get('order-producer-channel') as Channel,
-        ORDER_TOPICS.ORDER_PROCESSING,
-        constructOrderEvent(freshOrder, ORDER_EVENTS.ORDER_PLACED),
-        logger,
-      );
-      rabbitmq.publish(
-        req.app.get('user-activity-producer-channel') as Channel,
-        ACTIVITY_TOPICS.USER_ACTIVITIES,
-        constructOrderEvent(freshOrder, USER_ACTIVITY_EVENTS.USER_ORDER_PLACING),
-        logger,
-      );
+      fireEvents(freshOrder, req);
     }
 
     return res.json(freshOrder);

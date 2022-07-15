@@ -77,7 +77,10 @@ declare global {
 
     namespace ActivityLog {
       interface UserActivityLogSchema {
-        //
+        type: string;
+        anonymousUserId: string;
+        payload: T.Events.UserPlacedOrderEvent;
+        requestInfo: { [key: string]: any };
       }
     }
   }

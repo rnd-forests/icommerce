@@ -16,9 +16,17 @@ export const genAnonymousUserId = (salt: string, request: RequestInfo): string =
 export const genAnonymousUserIdWithSecret = (secret: string, request: RequestInfo): string =>
   genAnonymousUserId(hash(`${secret}/${formatISO(new Date(), { representation: 'date' })}`), request);
 
-export const genAnonymousUserIdFromRequest = (secret: string, req: Request): string =>
-  genAnonymousUserIdWithSecret(secret, {
+export const genAnonymousUserIdFromRequest = (
+  secret: string,
+  req: Request,
+): { id: string; requestInfo: { [key: string]: any } } => {
+  const requestInfo = {
     domain: req.get('origin') || req.get('host'),
     ip: req.ip,
     userAgent: req.headers['user-agent'],
-  });
+  };
+
+  const id = genAnonymousUserIdWithSecret(secret, requestInfo);
+
+  return { id, requestInfo };
+};
