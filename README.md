@@ -5,9 +5,9 @@
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Modeling](#microservice-modeling)
     - [Microservice Communication Styles](#microservice-communication-styles)
-    - [Order Processing Event Collaboration](#order-processing-event-collaboration)
-    - [Order Processing Message Broker](#order-processing-message-broker)
+      - [Order Processing Event Collaboration](#order-processing-event-collaboration)
     - [Microservice Worflow - SAGA Pattern](#microservice-worflow---saga-pattern)
+      - [Order Processing Message Broker](#order-processing-message-broker)
     - [Microservice Security](#microservice-security)
     - [Microservice Testing](#microservice-testing)
   - [Installation Guides](#installation-guides)
@@ -41,16 +41,15 @@ TODO - DDD, CQRS, Event Sourcing, Domain Driven Design
 #### Microservice Communication Styles
 TODO
 
-#### Order Processing Event Collaboration
+##### Order Processing Event Collaboration
 
 ![](./docs/images/order_event_collaboration.jpg)
 
-#### Order Processing Message Broker
+#### Microservice Worflow - SAGA Pattern
+
+##### Order Processing Message Broker
 
 ![](docs/images/order_processing_message_broker.jpg)
-
-#### Microservice Worflow - SAGA Pattern
-TODO
 
 #### Microservice Security
 
