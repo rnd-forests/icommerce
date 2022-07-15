@@ -56,6 +56,60 @@ Our microservices are located in `packages` directory. Each microservice has a `
 
 ### Project Structure, Frameworks and Libraries
 
+#### Codebase Structure
+
+Here's the general structure of project codebase.
+
+```
+.
+├── babel.config.js
+├── docker-compose.yml
+├── docs
+│   └── images
+├── .editorconfig
+├── .eslintignore
+├── .eslintrc.js
+├── .gitignore
+├── .husky
+│   ├── _
+│   └── pre-commit
+├── index.d.ts
+├── lerna.json
+├── lib
+│   ├── common
+│   ├── microservice
+│   ├── server
+│   └── webpack
+├── nx.json
+├── .nx-cache
+├── package.json
+├── package-lock.json
+├── packages
+│   ├── activity-log-service
+│   ├── customer-service
+│   ├── order-processor-service
+│   └── warehouse-service
+├── .prettierignore
+├── .prettierrc
+├── README.md
+├── setup-dev.sh
+├── tsconfig.eslint.json
+└── tsconfig.json
+```
+
+There're two main directories we need to focus on: `lib` and `packages`. Other are just configurations files for build tools, linter, TypeScript, etc.
+
+The `lib` directory contains shared codes and libraries that will be used by our microservices. All packages in `lib` will has the name with prefix `@lib/`.
+
+- `common`: contains logic for debugger, logging, tracing (for example, generating ID for anonymous users), and contants for event types, message broker topics, etc.
+- `microservice`: defines the boilerplate code for our microservices. It's a wrapper round `express` framework, Node.js HTTP server, simple middleware layers and a basic server-to-server authorization using API key (passed through the `Authorization-Server` customer HTTP header).
+- `server`: defines the boilerplat for server common setups which include: database connections (PostgreSQL and MongoDB), Express.js middlewares, RabbitMQ connector/producer/consumer.
+- `webpack`: defines the boilerplate for webpack configuration the will be used and extended by microservices.
+
+Here is a graph that demonstrates the relationship between packages in project.
+
+![](docs/images/packages-graph.png)
+
 #### Frameworks and Tools
 Here're are the list of tools and frameworks used in this project:
 
