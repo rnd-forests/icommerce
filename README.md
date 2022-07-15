@@ -16,3 +16,4 @@ TODO
 - NX graphq
 - rabittmq structure (channels, exchanges, queue, etc)
 - dev env (OS)
+- rate limit for order placed API???
