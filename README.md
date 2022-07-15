@@ -8,6 +8,30 @@
 - dev env (OS)
 - rate limit for order placed API???
 
+
+- [iCommerce](#icommerce)
+  - [High Level Architecture](#high-level-architecture)
+  - [Database Design](#database-design)
+  - [Development Principles and Patterns](#development-principles-and-patterns)
+    - [Microservice Modeling](#microservice-modeling)
+    - [Microservice Communication Styles](#microservice-communication-styles)
+    - [Order Processing Event Collaboration](#order-processing-event-collaboration)
+    - [Order Processing Message Broker](#order-processing-message-broker)
+    - [Microservice Worflow - SAGA Pattern](#microservice-worflow---saga-pattern)
+    - [Microservice Security](#microservice-security)
+    - [Microservice Testing](#microservice-testing)
+  - [Installation Guides](#installation-guides)
+  - [Project Structure, Frameworks and Libraries](#project-structure-frameworks-and-libraries)
+    - [Codebase Structure](#codebase-structure)
+    - [Frameworks and Tools](#frameworks-and-tools)
+    - [Open-source Packages](#open-source-packages)
+  - [API Endpoints](#api-endpoints)
+    - [Get Product Detail](#get-product-detail)
+    - [Fetch, Search and Filter Products](#fetch-search-and-filter-products)
+    - [Find or Create Customer](#find-or-create-customer)
+    - [Fetch Customer Detail](#fetch-customer-detail)
+    - [Create New Order](#create-new-order)
+
 ### High Level Architecture
 
 ### Database Design
