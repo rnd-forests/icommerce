@@ -1,14 +1,4 @@
 ## iCommerce
-
-- installation guide: setup script, docker, docker compose
-- authentication for order api??
-- cloud events, message format
-- NX graphq
-- rabittmq structure (channels, exchanges, queue, etc)
-- dev env (OS)
-- rate limit for order placed API???
-
-
 - [iCommerce](#icommerce)
   - [High Level Architecture](#high-level-architecture)
   - [Database Design](#database-design)
@@ -34,6 +24,13 @@
 
 ### High Level Architecture
 
+- installation guide: setup script, docker, docker compose
+- authentication for order api??
+- cloud events, message format
+- NX graphq
+- rabittmq structure (channels, exchanges, queue, etc)
+- dev env (OS)
+- rate limit for order placed API???
 ### Database Design
 
 ### Development Principles and Patterns
