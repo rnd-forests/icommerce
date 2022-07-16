@@ -12,8 +12,7 @@
     - [Microservice Communication Styles](#microservice-communication-styles)
       - [Synchronous Blocking via HTTP calls](#synchronous-blocking-via-http-calls)
       - [Asynchronous Nonblocking using Message Broker](#asynchronous-nonblocking-using-message-broker)
-    - [Microservice Worflow - SAGA Pattern](#microservice-worflow---saga-pattern)
-      - [Order Processing Message Broker](#order-processing-message-broker)
+    - [Microservice Worflow - Saga Pattern](#microservice-worflow---saga-pattern)
     - [Microservice Security](#microservice-security)
     - [Microservice Testing](#microservice-testing)
   - [Installation Guides](#installation-guides)
@@ -426,11 +425,40 @@ Sample events that are processed by `activity-log` microservice.
 
 We use RabbitMQ to implement all event-driven operations in the system. It acts as both producer and consumer of events. Producers use an API (via Node.js SDK) to publish an event to the message broker. The broker handles subscriptions and notify consumers when an event arrives. Event-driven architecture can help to create more decoupled and scalable systems. However, this communication style also adds complexity to system infrastructure. We may face the situation where events are lost or the same event is sent multiple times.
 
-#### Microservice Worflow - SAGA Pattern
+#### Microservice Worflow - Saga Pattern
 
-##### Order Processing Message Broker
+In previous section, we discuss the communication styles between microservices. How one microservice talks to another. To implement a business process, we need to collaboration between multiple microservices. As the data is distributed among microservices (each microservice has its own database), the data mannipulation flow is propagated through multiple microservices also.
+
+In the context of a single microservice, we might need to combine several actions as an atomic one. When making multiple changes as part of an overall operation, we want to confirm that all the changes have been made. Otherwise, we need to clean up when errors happen. In our application, we utilize PostgreSQL database transaction to achieve that purpose. For example, when creating new order we wrap several database queries into single transaction: creating order, creating order items, creating transaction.
+
+As data is distributed across microservices, a simple database transaction cannot handle operations in different microservices that use different database connection or even different database technologies. We can use method like [2PC](https://en.wikipedia.org/wiki/Two-phase_commit_protocol) (two-phase commit) to implement a distributed transaction. However, I think is hard to implement. We may face situations like table locking issues, long-running operations, etc.
+
+In the context of this application, we use [Saga](https://microservices.io/patterns/data/saga.html) to implement a distributed operation. Saga coordinate multiple changes in application state; however, it avoids the need for locking resources for long time and removes the need of a centralized coordinator (in case of Choreographed Saga) as in 2PC. Saga models the business workflow as discrete activities that can be excecuted independently. The following figure demonstrates the use of Saga pattern to implement order fulfillment worflow in our system.
 
 ![](docs/images/order_processing_message_broker.jpg)
+
+Basicially, in each microservice we still use ACID transactions to carry out operations. However, with external communications, we use message broker to represent the current order state. Other microservices can subscribe to the message broker and update the order state accordingly.
+
+To handle failures during Saga execution, we use **backward recovery** failure mode. It's the process of defining compensating actions that allow us to revert previously committed transactions.
+
+We use **Choreographed Saga** to implement order fullfillment workflow. As I understand, this kind of Saga will distribute responsibility to complete a given business operation among multiple collaborating microservices. Choreographed saga makes use of event collaboration between parties.
+
+Let's discuss about what's going on in the above figure:
+
+First, we define two separated message broker topics to handle order succeededs event and order error events: `order:processing` and `order:error`. We can use a single topic for all events; however, we'll separate those events in our case.
+
+- The client send the request to initiate the ordering process. Here, that request would go through several layers like API Gateway and finally hit our `order-processor` microservice **(1)**.
+- The `order-processor` microservice performs order creation process. The order in this case will be in `new` status **(2)**.
+- The `order-processor` will contact `customer` service to retrieve customer information. This may create the customer in process **(3.1)**.
+- The `order-processor` will fire `order:placed` event. The `warehouse` microservice will receive that event, it knows its job is to reserve the product stocks and fire an event when that is done **(3.2)**.
+- The `warehouse` microservice reserve stock for products associated with a given order **(4)**.
+- If product stocks are reserved successfully, the `warehouse` microservice will fire `warehouse:stock:reserved` event **(5.1)**.
+- The `order-processor` microservice will pick up on `warehouse:stock:reserved` event and update order status to `complete` accordingly **(6)**.
+- If products are not available or running out of stock, `warehouse` microservice will fire `warehouse:stock:reserved:error` **(5.2)**.
+- If `warehouse:stock:reserved:error` is fired, a series of compensating actions would be performed. With `warehouse` microservice, it would be to revert any reserved product stock. In the context of our application, this can be done easily using database ACID transaction. However, if the `warehouse` communicate with other microservices and those microservices throw errors, we need to perform SQL queries to revert product stocks. For `order-processor` microservice, the compensation action would be to update order status to `pending`.
+- If the order fulfillment process is completed without any errors, `order-processor` will fire `order:completed` event **(7)**.
+
+Using Saga pattern, we can decouple the relationship between microservices, on service needs to know about any other microservices. They only care when certain event is received. This would drastically reduce the amount of domain coupling. The downsides of this approach, I think, is the lack of an explicit representation of the business process; the compensating actions are normally (not always) push to microservices themselves. I think we can use tracking ID or corrleation ID to identify the order of events and use external tools to visualize the process using that kind of ID.
 
 #### Microservice Security
 
