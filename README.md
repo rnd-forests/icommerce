@@ -3,6 +3,7 @@
   - [High Level Architecture](#high-level-architecture)
   - [Database Design](#database-design)
     - [Warehouse Microservice](#warehouse-microservice)
+    - [Customer Microservice](#customer-microservice)
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Modeling](#microservice-modeling)
     - [Microservice Communication Styles](#microservice-communication-styles)
@@ -55,12 +56,29 @@ We also add some indices to support the searching and filtering functionalities.
 - A compound index for `branch` and `color`:
 
 ```sql
-CREATE INDEX products_branch_color ON public.products USING btree (branch, color);
+CREATE INDEX products_branch_color ON products USING btree(branch, color);
 ```
 - A full text index for `product_search_vector`:
 
 ```sql
-CREATE INDEX products_search ON public.products USING gin(product_search_vector);
+CREATE INDEX products_search ON products USING gin(product_search_vector);
+```
+
+#### Customer Microservice
+![](./docs/images/database/customer-db.png)
+
+This microservice has a table called `customers` to store customer information. Although, we don't provide the registration feature, we still need to store the customer information in order to support the `order-processor` microservice. Customers are indexed by their phone number. We retrieve or create new customer from information sent from `order-processor` microservice.
+
+- `id`: table primary key in UUID format.
+- `firstName`: customer first name.
+- `lastName`: customer last name.
+- `phone`: customer phone number.
+- `createdAt` and `updatedAt`: automatically generated timestamps for the record.
+
+We just add an additional unique index for `phone`:
+
+```sql
+CREATE UNIQUE INDEX customers_phone ON customers USING btree(phone);
 ```
 
 ### Development Principles and Patterns
