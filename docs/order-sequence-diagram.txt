@@ -1,0 +1,44 @@
+title iCommerce Order Fulfillment
+
+frame Order Workflow
+actor Client
+boundary Network Perimeter
+
+participantgroup #lightblue Microservices
+participant Order Processor Microservice
+participant Customer Microservice
+participant Warehouse Microservice
+end
+
+Client->Network Perimeter: request new order
+Network Perimeter->Order Processor Microservice: invoke /v1/orders API
+activate Order Processor Microservice
+Order Processor Microservice->Customer Microservice: retrieve/create customer
+activate Customer Microservice
+Customer Microservice->Customer Microservice: retry request on failures
+
+alt #lightgrey cannot retrieve customer
+Customer Microservice--xOrder Processor Microservice: error response
+Order Processor Microservice-->Network Perimeter: order creation error
+Network Perimeter-->Client: order creation error
+else can retrieve customer
+Customer Microservice-->Order Processor Microservice: customer information
+deactivate Customer Microservice
+end
+
+Order Processor Microservice->Warehouse Microservice: reserve product stocks
+activate Warehouse Microservice
+
+alt #lightgrey cannot reserve stocks
+Warehouse Microservice--xOrder Processor Microservice: stock reservation error
+Order Processor Microservice->Order Processor Microservice: update order status to pending
+Order Processor Microservice-->Network Perimeter: send pending order
+Network Perimeter->Client: forward pending order
+else can reserve stocks
+Warehouse Microservice-->Order Processor Microservice: product stocks reserved
+deactivate Warehouse Microservice
+Order Processor Microservice->Order Processor Microservice: update order status to complete
+Order Processor Microservice-->Network Perimeter: send complete order
+Network Perimeter-->Client: forward complete order
+end
+deactivate Order Processor Microservice

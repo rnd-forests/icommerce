@@ -2,6 +2,7 @@
 
 - [iCommerce](#icommerce)
   - [High Level Architecture](#high-level-architecture)
+    - [Order Fullfillment Sequence Diagram](#order-fullfillment-sequence-diagram)
   - [Database Design](#database-design)
     - [Warehouse Microservice](#warehouse-microservice)
     - [Customer Microservice](#customer-microservice)
@@ -14,8 +15,8 @@
       - [Asynchronous Nonblocking using Message Broker](#asynchronous-nonblocking-using-message-broker)
     - [Microservice Worflow - Saga Pattern](#microservice-worflow---saga-pattern)
     - [Microservice Security](#microservice-security)
-    - [Microservice Testing](#microservice-testing)
       - [Service-to-Service Authentication](#service-to-service-authentication)
+    - [Microservice Testing](#microservice-testing)
   - [Installation Guides](#installation-guides)
   - [Project Structure, Frameworks and Libraries](#project-structure-frameworks-and-libraries)
     - [Codebase Structure](#codebase-structure)
@@ -30,8 +31,9 @@
 
 ### High Level Architecture
 
-- authentication for order api??
-- rate limit for order placed API???
+#### Order Fullfillment Sequence Diagram
+
+![](./docs/images/sequences/order-sequence-diagram.svg)
 
 ### Database Design
 
@@ -457,9 +459,6 @@ First, we define two separated message broker topics to handle order succeededs 
 Using Saga pattern, we can decouple the relationship between microservices, one service doesn't need to know about any other microservices. They only care when certain event is received. This would drastically reduce the amount of domain coupling. The downsides of this approach, I think, is the lack of an explicit representation of the business process; the compensating actions are normally (not always) push to microservices themselves. I think we can use tracking ID or corrleation ID to identify the order of events and use external tools to visualize the process using that kind of ID.
 
 #### Microservice Security
-
-#### Microservice Testing
-
 ##### Service-to-Service Authentication
 If our microservices are deployed to real infrastructure, we can use **mutual TLS** (mTLS) to implement a form of authentication between services. When a server talks to another server using mTLS, those servers are able to authenticate each other.
 
@@ -475,6 +474,8 @@ Authentication using JWT is a bit more complicated. When using this kind of auth
 Using JWT token allows us to send additional data between microservices not just a simple stateless API key. We can also set expiry time for the token to reduce the attack surface if that token is somehow leaked.
 
 Currently, we generate the JWT token once when starting microservice and the expiry time is set to 30 days. We don't have the mechanism to obtain new JWT token if the current one is expired. We can implement additional feature to refresh the current JWT.
+
+#### Microservice Testing
 
 ### Installation Guides
 
