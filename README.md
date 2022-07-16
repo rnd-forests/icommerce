@@ -15,6 +15,7 @@
     - [Microservice Worflow - Saga Pattern](#microservice-worflow---saga-pattern)
     - [Microservice Security](#microservice-security)
     - [Microservice Testing](#microservice-testing)
+      - [Service-to-Service Authentication](#service-to-service-authentication)
   - [Installation Guides](#installation-guides)
   - [Project Structure, Frameworks and Libraries](#project-structure-frameworks-and-libraries)
     - [Codebase Structure](#codebase-structure)
@@ -459,6 +460,22 @@ Using Saga pattern, we can decouple the relationship between microservices, one 
 
 #### Microservice Testing
 
+##### Service-to-Service Authentication
+If our microservices are deployed to real infrastructure, we can use **mutual TLS** (mTLS) to implement a form of authentication between services. When a server talks to another server using mTLS, those servers are able to authenticate each other.
+
+In the context of our application, we implement two simple authentication mechanisms at microservice layer:
+
+- Authentication using API key.
+- Authentication using JWT.
+
+Authentication using API key is quite simple. When creating new microservice, we configure an API key for that microservice. Other microservices want to access that microservice need to obtain the API key first. After that, they can send that API key through `Authorization-ApiKey` custom header.
+
+Authentication using JWT is a bit more complicated. When using this kind of authentication mechanism, we assume that each microservice has an unique name. Let assume that microservice **A** wants to communicate with microservice **B**. We generate a JWT token from service **A** with the token audience claim set to the name of microservice **B**. On microservice **B** side, after receiving the JWT, it reads the audience claim and verifies that the audience value matched the service name. If so, the authentication process is consisdered succeeded. We use this kind of authentication between `order-processor` and `customer` microservices.
+
+Using JWT token allows us to send additional data between microservices not just a simple stateless API key. We can also set expiry time for the token to reduce the attack surface if that token is somehow leaked.
+
+Currently, we generate the JWT token once when starting microservice and the expiry time is set to 30 days. We don't have the mechanism to obtain new JWT token if the current one is expired. We can implement additional feature to refresh the current JWT.
+
 ### Installation Guides
 
 This project is written in Node.js, so before you can use it, you need to install Node.js.
@@ -658,7 +675,7 @@ Request queries:
 
 ```bash
 curl --location --request POST 'http://localhost:3003/v1/customers' \
---header 'Authorization-ApiKey: 11fc224e-0205-4cfa-a2d4-070b9607c2d1' \
+--header 'Authorization-Server: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc5ODM4OTgsImV4cCI6MTY2MDU3NTg5OCwiYXVkIjpbImN1c3RvbWVyLXNlcnZpY2UiXSwiaXNzIjoib3JkZXItcHJvY2Vzc29yLXNlcnZpY2UifQ.ucGmzDHBpx3llk31_yvgW-zcrtWlZfT9NfN3lND7Y0E' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "firstName": "Vinh",
@@ -684,7 +701,7 @@ Sample response:
 
 ```bash
 curl --location --request GET 'http://localhost:3003/v1/customers/58225157-b45d-4944-9099-ed1a2d737847' \
---header 'Authorization-ApiKey: 11fc224e-0205-4cfa-a2d4-070b9607c2d1'
+--header 'Authorization-Server: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTc5ODM4OTgsImV4cCI6MTY2MDU3NTg5OCwiYXVkIjpbImN1c3RvbWVyLXNlcnZpY2UiXSwiaXNzIjoib3JkZXItcHJvY2Vzc29yLXNlcnZpY2UifQ.ucGmzDHBpx3llk31_yvgW-zcrtWlZfT9NfN3lND7Y0E'
 ```
 
 Sample response:
