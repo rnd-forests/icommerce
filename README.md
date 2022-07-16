@@ -175,7 +175,7 @@ When placing new order by calling `POST /v1/orders` endpoint, the `order-process
 
 This method is used here to make sure the customer is persisted in our database before moving on to other actions. We don't implement a chain of blocking calls between a lot of microservices here, so this method is suitable for our current use case.
 
-This communication style has downsides. For example, `customer` microservice need to be reachable from `order-processor` microservice; otherwise, the operation carried by `order-processor` will fail. In that situation, `order-processor` microservice need to decide on complensating action to carry out. On possible action could be retrying the call until we reach a timeout or a maximum number of retries. Another issue is that `customer` may have a slow response time due to high load, network latency or performance degration. In those cases, the overall operation will be blocked for a prolonged period of time.
+This communication style has downsides. For example, `customer` microservice need to be reachable from `order-processor` microservice; otherwise, the operation carried by `order-processor` will fail. In that situation, `order-processor` microservice need to decide on complensating action to carry out. On possible action could be retrying the call until we reach a timeout or a maximum number of retries (in our application, when calling to `customer` microservice, we utilize retry capability of `got` package to retry request maximum of three times). Another issue is that `customer` may have a slow response time due to high load, network latency or performance degration. In those cases, the overall operation will be blocked for a prolonged period of time.
 
 ##### Asynchronous Nonblocking using Message Broker
 
@@ -413,10 +413,7 @@ Sample events that are processed by `activity-log` microservice.
       "limit": "2",
       "offset": "0"
     },
-    "matchedProductIds": [
-      "4b2c535c-a10d-40e5-9e66-f9b1ce2edd3b",
-      "7c9e1559-fa85-4ae6-a08a-abf0a539b602"
-    ]
+    "matchedProductIds": ["4b2c535c-a10d-40e5-9e66-f9b1ce2edd3b", "7c9e1559-fa85-4ae6-a08a-abf0a539b602"]
   }
 }
 ```

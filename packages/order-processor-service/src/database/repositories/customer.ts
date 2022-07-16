@@ -12,6 +12,10 @@ export const fetchCustomer = async (
       json: attributes,
       responseType: 'json',
       headers: { 'Authorization-Server': customerServiceApiKey },
+      retry: {
+        limit: 3,
+        maxRetryAfter: 10000,
+      },
     })
     .json<T.Customer.CustomerSchema | T.API.ErrorResponse>();
 
