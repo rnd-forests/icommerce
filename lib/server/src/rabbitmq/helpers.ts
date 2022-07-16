@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Message } from 'amqplib';
 import { CloudEvent, Version } from 'cloudevents';
 
 export const constructEvent = <T>(
@@ -17,3 +18,9 @@ export const constructEvent = <T>(
     data,
     metadata,
   });
+
+export const stringifyMessage = (message: Message | null) => {
+  if (!message) return '<empty>';
+  const content = JSON.parse(message.content.toString()) as { [key: string]: any };
+  return JSON.stringify({ ...message, content });
+};

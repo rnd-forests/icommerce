@@ -2,12 +2,7 @@
 
 import { Connection, Channel, Message } from 'amqplib';
 import { ICommerceDebugger } from '@lib/common';
-
-function stringifyMessage(message: Message | null) {
-  if (!message) return '<empty>';
-  const content = JSON.parse(message.content.toString()) as { [key: string]: any };
-  return JSON.stringify({ ...message, content });
-}
+import { stringifyMessage } from './helpers';
 
 interface ConsumerConfig {
   connection: Connection;

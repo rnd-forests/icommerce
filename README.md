@@ -1,4 +1,5 @@
 ## iCommerce
+
 - [iCommerce](#icommerce)
   - [High Level Architecture](#high-level-architecture)
   - [Database Design](#database-design)
@@ -33,14 +34,18 @@
 - cloud events, message format
 - rabittmq structure (channels, exchanges, queue, etc)
 - rate limit for order placed API???
+
 ### Database Design
+
 We use two types of database to store our data:
+
 - Relational database (PostgreSQL): to store products, orders and customers.
 - Non-relational database (MongoDB): to store activity logs.
 
 We'll go through the database structure and schema for each microservice. Some microservices are quite simple so they may contain only single table or collection.
 
 #### Warehouse Microservice
+
 ![](./docs/images/database/warehouse-db.png)
 
 This microservice has a single table called `products` with the following fields:
@@ -61,6 +66,7 @@ We also add some indices to support the searching and filtering functionalities.
 ```sql
 CREATE INDEX products_branch_color ON products USING btree(branch, color);
 ```
+
 - A full text index for `product_search_vector`:
 
 ```sql
@@ -68,6 +74,7 @@ CREATE INDEX products_search ON products USING gin(product_search_vector);
 ```
 
 #### Customer Microservice
+
 ![](./docs/images/database/customer-db.png)
 
 This microservice has a table called `customers` to store customer information. Although, we don't provide the registration feature, we still need to store the customer information in order to support the `order-processor` microservice. Customers are indexed by their phone number. We retrieve or create new customer from information sent from `order-processor` microservice.
@@ -85,6 +92,7 @@ CREATE UNIQUE INDEX customers_phone ON customers USING btree(phone);
 ```
 
 #### Order Processor Microservice
+
 ![](./docs/images/database/order-processor-db.png)
 
 This microservice has three tables: `orders`, `order_items` and `transactions`. The relationships between these table are as follows. Those relationships are represented by foreign keys between tables.
@@ -142,6 +150,7 @@ CREATE INDEX transactions_order_id ON public.transactions USING btree("orderId")
 If we support online payments, this table would includes other information such as: payment transaction reference, payment transaction status, payment provider information, etc.
 
 #### Activity Log Service
+
 This service use non-relational database MongoDB to store stream of events or activity logs. The database has a single collection for store user activity logs such as: placing order, searching and filtering products, etc. The collection is named `user_activities`. Each document inside collection has following structure:
 
 - `type`: the type of the activity, basicially it's the event name.
@@ -151,9 +160,11 @@ This service use non-relational database MongoDB to store stream of events or ac
 ### Development Principles and Patterns
 
 #### Microservice Modeling
+
 TODO - DDD, CQRS, Event Sourcing, Domain Driven Design
 
 #### Microservice Communication Styles
+
 To support data transfer between microservices, we use the following communication styles:
 
 - Synchronous Blocking via HTTP calls.
@@ -171,7 +182,120 @@ This communication style has downsides. For example, `customer` microservice nee
 
 ##### Asynchronous Nonblocking using Message Broker
 
+Different from synchronous blocking communication style, asynchronous nonblocking communication style is based on message broker. The message broker is a messaging system that allows microservices to communicate with each other. The message broker is a middleware that sits between the microservices and the underlying system. Rather than a microservice asking other microservices to do something, a microservice just emits their events and other microservices can listent to those events if they need. This communication style is asynchronous as event handlers will be running in their own thread of execution.
+
+**Order Creation Event Collaboration**
+
 ![](./docs/images/order_event_collaboration.jpg)
+
+Placing an order is responsibility of several microservices in our system, inclucing: `order-processor`,`customer` and `warehouse`. Basicially speaking,
+
+- `order-processor`: is the one that creates the order. This order is in `new` status.
+- `customer`: is responsible to fetch or create customer.
+- `warehouse`: is responsible to reserve stocks for order items or products.
+
+We've already discussed the communication style between `order-processor` and `customer` microservices in the previous section. The figure above shows the event collaboration between `order-processor` and `warehouse` microservices.
+
+1. `order-processor` fires **Order Placed** event after the order is created.
+2. `warehouse` listens to **Order Placed** event and reserve the stocks for products of the order. The products information can be found in the content of the event payload.
+3. `warehouse` fires a new event called **Stock Reserved** to notify other parties that the stocks are reserved to given list of products.
+4. `order-processor` listens to **Stock Reserved** event and update the order status to `complete`.
+5. `order-processor` fires a new event called **Order Completed** to notify other parties that the order is completed.
+
+Here, we just illustrate the happy path when creating new order. We'll discuss edge cases in the following sections.
+
+Sample events that are fired during order creation process.
+
+`Order Placed` Event: a fully detailed event that contains all information about the newly created order.
+
+```json
+{
+  "id": "7de145e9-4304-4b0f-9a6b-e0ce310c0028",
+  "time": "2022-07-16T09:18:46.749Z",
+  "type": "order:placed",
+  "source": "order-processor-service:order:e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+  "specversion": "1.0",
+  "datacontenttype": "application/json",
+  "metadata": {},
+  "data": {
+    "id": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+    "customerId": "4ca06e5f-eb3c-4e20-ba03-338a2d0befd5",
+    "status": "new",
+    "total": "105.00",
+    "firstName": "Vinh",
+    "lastName": "Nguyen",
+    "phone": "+84349609698",
+    "createdAt": "2022-07-16T09:18:46.729Z",
+    "updatedAt": "2022-07-16T09:18:46.729Z",
+    "orderItems": [
+      {
+        "id": "7bae9f70-6672-4431-8a21-51291e4f7238",
+        "orderId": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+        "itemId": "314fb0ac-5e5d-4ca3-ace4-6465620b6eb7",
+        "price": "15.00",
+        "quantity": 2,
+        "createdAt": "2022-07-16T09:18:46.735Z",
+        "updatedAt": "2022-07-16T09:18:46.735Z"
+      },
+      {
+        "id": "58f028d8-7997-434d-92dd-8db8065efd95",
+        "orderId": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+        "itemId": "46bfcb7b-d769-45fb-8d8c-2b5079458e95",
+        "price": "25.00",
+        "quantity": 3,
+        "createdAt": "2022-07-16T09:18:46.735Z",
+        "updatedAt": "2022-07-16T09:18:46.735Z"
+      }
+    ]
+  }
+}
+```
+
+`Stock Reserved` Event: this event contains the order ID as the `order-processor` already has detailed information of a given order.
+
+```json
+{
+  "id": "6e360f95-4ec9-432e-a50b-fda5f71ae429",
+  "time": "2022-07-16T09:18:46.775Z",
+  "type": "warehouse:stock:reserved",
+  "source": "warehouse-service:order:e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+  "specversion": "1.0",
+  "datacontenttype": "application/json",
+  "metadata": {},
+  "data": {
+    "orderId": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0"
+  }
+}
+```
+
+`Order Completed` Event: this event contains basic information of the order (not including the order items, e.g.)
+
+```json
+{
+  "id": "20cde975-4dc1-435c-8c7d-6425bc0a6acf",
+  "time": "2022-07-16T09:18:46.785Z",
+  "type": "order:completed",
+  "source": "order-processor-service:order:e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+  "specversion": "1.0",
+  "datacontenttype": "application/json",
+  "metadata": {},
+  "data": {
+    "id": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+    "customerId": "4ca06e5f-eb3c-4e20-ba03-338a2d0befd5",
+    "status": "complete",
+    "total": "105.00",
+    "firstName": "Vinh",
+    "lastName": "Nguyen",
+    "phone": "+84349609698",
+    "createdAt": "2022-07-16T09:18:46.729Z",
+    "updatedAt": "2022-07-16T09:18:46.781Z"
+  }
+}
+```
+
+**Storing Activity Logs Event Collaboration**
+
+![](./docs/images/activity-log-event-collaboration.jpg)
 
 #### Microservice Worflow - SAGA Pattern
 
@@ -183,8 +307,8 @@ This communication style has downsides. For example, `customer` microservice nee
 
 #### Microservice Testing
 
-
 ### Installation Guides
+
 This project is written in Node.js, so before you can use it, you need to install Node.js.
 Make sure you have Node.js `v16` installed on your computer.
 
@@ -206,6 +330,7 @@ To start the installation process, run the `setup-dev.sh` script located at proj
 ```bash
 $ ./setup-dev.sh
 ```
+
 This simple script will do the followings:
 
 - Starting Docker containers for PostgreSQL, RabbitMQ, and MongoDB.
@@ -271,7 +396,6 @@ The `lib` directory contains shared codes and libraries that will be used by our
 - `server`: defines the boilerplat for server common setups which include: database connections (PostgreSQL and MongoDB), Express.js middlewares, RabbitMQ connector/producer/consumer.
 - `webpack`: defines the boilerplate for webpack configuration the will be used and extended by microservices.
 
-
 The `packages` directory contains the logic for all of our microservices. We define four microservices:
 
 - `warehouse-service`: this microservice is used to manage products and provide API endpoints to search, filter products as well as fetch product details. Thoose API endpoints will be used by our clients.
@@ -284,6 +408,7 @@ Here is a graph that demonstrates the relationship between packages in project.
 ![](docs/images/packages-graph.png)
 
 #### Frameworks and Tools
+
 Here're are the list of tools and frameworks used in this project:
 
 - [Lerna](https://lerna.js.org): a build system for managing multiple JavaScript packages from the same repository. In the context of our application, it's used for managing microservices and shared libraries.
@@ -299,6 +424,7 @@ Here're are the list of tools and frameworks used in this project:
 - [RabbitMQ](https://www.rabbitmq.com/): this message broker is used to convey messages between microservices.
 
 #### Open-source Packages
+
 Some of open-source packages used in project:
 
 - [debug](https://www.npmjs.com/package/debug): handle logs and debugging for services.
@@ -317,6 +443,7 @@ Postman Collection: https://www.getpostman.com/collections/24daeb7f7e1b5dfe4377
 ```bash
 curl --location --request GET 'http://localhost:3001/v1/products/6e7f704d-4f80-4fe0-9de5-46ff15d2fc11'
 ```
+
 Sample response:
 
 ```json
