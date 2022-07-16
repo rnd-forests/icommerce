@@ -5,6 +5,7 @@
     - [Warehouse Microservice](#warehouse-microservice)
     - [Customer Microservice](#customer-microservice)
     - [Order Processor Microservice](#order-processor-microservice)
+    - [Activity Log Service](#activity-log-service)
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Modeling](#microservice-modeling)
     - [Microservice Communication Styles](#microservice-communication-styles)
@@ -137,7 +138,14 @@ CREATE INDEX transactions_customer_id ON public.transactions USING btree("custom
 CREATE INDEX transactions_order_id ON public.transactions USING btree("orderId");
 ```
 
-If we support online payments, this table would includes other information such as: payment transaction reference, payment transaction status, payment provider information, ect.
+If we support online payments, this table would includes other information such as: payment transaction reference, payment transaction status, payment provider information, etc.
+
+#### Activity Log Service
+This service use non-relational database MongoDB to store stream of events or activity logs. The database has a single collection for store user activity logs such as: placing order, searching and filtering products, etc. The collection is named `user_activities`. Each document inside collection has following structure:
+
+- `type`: the type of the activity, basicially it's the event name.
+- `userId`: for some actions performed by a user, the identity of the client is consisdered anonymous. For example, when users browse the product catalog or view a specific product. The value of this `userId` attribute is the hashed value of domain, IP address and user agent where the request is originated.
+- `payload`: the payload of the activity. The content of this attribute is quite flexible. It depends of each event type. We'll dicuss more about this in event collaboration section.
 
 ### Development Principles and Patterns
 
