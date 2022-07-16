@@ -424,6 +424,8 @@ Sample events that are processed by `activity-log` microservice.
 }
 ```
 
+We use RabbitMQ to implement all event-driven operations in the system. It acts as both producer and consumer of events. Producers use an API (via Node.js SDK) to publish an event to the message broker. The broker handles subscriptions and notify consumers when an event arrives. Event-driven architecture can help to create more decoupled and scalable systems. However, this communication style also adds complexity to system infrastructure. We may face the situation where events are lost or the same event is sent multiple times.
+
 #### Microservice Worflow - SAGA Pattern
 
 ##### Order Processing Message Broker
