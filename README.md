@@ -30,8 +30,6 @@
 ### High Level Architecture
 
 - authentication for order api??
-- cloud events, message format
-- rabittmq structure (channels, exchanges, queue, etc)
 - rate limit for order placed API???
 
 ### Database Design
@@ -458,7 +456,7 @@ First, we define two separated message broker topics to handle order succeededs 
 - If `warehouse:stock:reserved:error` is fired, a series of compensating actions would be performed. With `warehouse` microservice, it would be to revert any reserved product stock. In the context of our application, this can be done easily using database ACID transaction. However, if the `warehouse` communicate with other microservices and those microservices throw errors, we need to perform SQL queries to revert product stocks. For `order-processor` microservice, the compensation action would be to update order status to `pending`.
 - If the order fulfillment process is completed without any errors, `order-processor` will fire `order:completed` event **(7)**.
 
-Using Saga pattern, we can decouple the relationship between microservices, on service needs to know about any other microservices. They only care when certain event is received. This would drastically reduce the amount of domain coupling. The downsides of this approach, I think, is the lack of an explicit representation of the business process; the compensating actions are normally (not always) push to microservices themselves. I think we can use tracking ID or corrleation ID to identify the order of events and use external tools to visualize the process using that kind of ID.
+Using Saga pattern, we can decouple the relationship between microservices, one service doesn't need to know about any other microservices. They only care when certain event is received. This would drastically reduce the amount of domain coupling. The downsides of this approach, I think, is the lack of an explicit representation of the business process; the compensating actions are normally (not always) push to microservices themselves. I think we can use tracking ID or corrleation ID to identify the order of events and use external tools to visualize the process using that kind of ID.
 
 #### Microservice Security
 
