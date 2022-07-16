@@ -544,7 +544,7 @@ There're two main directories we need to focus on: `lib` and `packages`. Other a
 The `lib` directory contains shared codes and libraries that will be used by our microservices. All packages in `lib` will has the name with prefix `@lib/`.
 
 - `common`: contains logic for debugger, logging, tracing (for example, generating ID for anonymous users), and contants for event types, message broker topics, etc.
-- `microservice`: defines the boilerplate code for our microservices. It's a wrapper round `express` framework, Node.js HTTP server, simple middleware layers and a basic server-to-server authorization using API key (passed through the `Authorization-Server` customer HTTP header).
+- `microservice`: defines the boilerplate code for our microservices. It's a wrapper round `express` framework, Node.js HTTP server, simple middleware layers and a basic server-to-server authorization using API key (passed through the `Authorization-ApiKey` customer HTTP header).
 - `server`: defines the boilerplat for server common setups which include: database connections (PostgreSQL and MongoDB), Express.js middlewares, RabbitMQ connector/producer/consumer.
 - `webpack`: defines the boilerplate for webpack configuration the will be used and extended by microservices.
 
@@ -658,7 +658,7 @@ Request queries:
 
 ```bash
 curl --location --request POST 'http://localhost:3003/v1/customers' \
---header 'Authorization-Server: 11fc224e-0205-4cfa-a2d4-070b9607c2d1' \
+--header 'Authorization-ApiKey: 11fc224e-0205-4cfa-a2d4-070b9607c2d1' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "firstName": "Vinh",
@@ -684,7 +684,7 @@ Sample response:
 
 ```bash
 curl --location --request GET 'http://localhost:3003/v1/customers/58225157-b45d-4944-9099-ed1a2d737847' \
---header 'Authorization-Server: 11fc224e-0205-4cfa-a2d4-070b9607c2d1'
+--header 'Authorization-ApiKey: 11fc224e-0205-4cfa-a2d4-070b9607c2d1'
 ```
 
 Sample response:

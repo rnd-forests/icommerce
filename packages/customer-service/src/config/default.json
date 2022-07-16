@@ -3,7 +3,13 @@
   "server": {
     "apiKey": "11fc224e-0205-4cfa-a2d4-070b9607c2d1",
     "port": 3003,
-    "jsonLimit": "5mb"
+    "jsonLimit": "5mb",
+    "jwt": {
+      "secret": "1167163f-237d-4c3a-bf90-c27ebb3be6a4",
+      "expiresIn": "30 days",
+      "audience": [],
+      "ignoredPaths": []
+    }
   },
   "database": {
     "username": "customer_user",

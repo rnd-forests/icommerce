@@ -3,7 +3,13 @@
   "server": {
     "apiKey": "",
     "port": 3002,
-    "jsonLimit": "5mb"
+    "jsonLimit": "5mb",
+    "jwt": {
+      "secret": "1167163f-237d-4c3a-bf90-c27ebb3be6a4",
+      "expiresIn": "30 days",
+      "audience": ["customer-service"],
+      "ignoredPaths": ["/v1/orders"]
+    }
   },
   "amqp": {
     "connection": "amqp://icommerce:icommerce@localhost:5672",

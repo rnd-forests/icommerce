@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { Server } from 'http';
 import express from 'express';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import { ICommerceDebugger } from '@lib/common';
 import _isError from 'lodash/isError';
@@ -19,6 +20,13 @@ interface MicroserviceInitOptions {
   serverExit: () => Promise<void>;
   serverJsonLimit: string;
   logger: ICommerceDebugger;
+  jwtConfigurations?: {
+    secret: string;
+    expiresIn: string | number;
+    issuer: string;
+    audience: string[]; // The list of microservices that this microservice communicates with.
+    ignoredPaths: string[];
+  };
 }
 
 export function Microservice(opts: MicroserviceInitOptions) {
@@ -32,6 +40,7 @@ export function Microservice(opts: MicroserviceInitOptions) {
     serverListenCb,
     serverExit,
     logger,
+    jwtConfigurations,
   } = opts;
 
   logger.info(`[SERVER] initializing microservice: ${serviceName}`);
@@ -72,17 +81,61 @@ export function Microservice(opts: MicroserviceInitOptions) {
     app.options('*', cors({ credentials: true }));
   }
 
+  const authorizationErrMessage = 'Invalid authorization credential provided.';
+
   /**
    * This is a basic server to server authentication using API key.
    */
   if (serverApiKey) {
     app.use((req, res, next) => {
-      const token = req.get('Authorization-Server');
+      const token = req.get('Authorization-ApiKey');
       if (token !== serverApiKey) {
-        res.status(401).send({ message: 'Invalid authorization credential provided.' });
+        res.status(401).send({ message: authorizationErrMessage });
       } else {
         next();
       }
+    });
+  }
+
+  /**
+   * Server to server authentication using JWT token.
+   */
+  if (jwtConfigurations) {
+    app.use((req, res, next) => {
+      if (jwtConfigurations.ignoredPaths.includes(req.path)) {
+        next();
+        return;
+      }
+
+      const jwtToken = req.get('Authorization-Server') || '';
+      try {
+        const decoded = jwt.verify(jwtToken, jwtConfigurations.secret, { complete: true });
+        const { aud } = decoded.payload as JwtPayload;
+        if (!aud) {
+          res.status(401).send({ message: authorizationErrMessage });
+          return;
+        }
+
+        const parsedAudience = typeof aud === 'string' ? [aud] : aud;
+        const isValidAudience = parsedAudience.includes(serviceName);
+        if (!isValidAudience) {
+          res.status(401).send({ message: authorizationErrMessage });
+          return;
+        }
+        next();
+      } catch (e) {
+        res.status(401).send({ message: authorizationErrMessage });
+      }
+    });
+
+    app.use((_req, _res, next) => {
+      const jwtToken = jwt.sign({}, jwtConfigurations.secret, {
+        audience: jwtConfigurations.audience,
+        expiresIn: jwtConfigurations.expiresIn,
+        issuer: jwtConfigurations.issuer,
+      });
+      app.set('Authorization-Server', jwtToken);
+      next();
     });
   }
 

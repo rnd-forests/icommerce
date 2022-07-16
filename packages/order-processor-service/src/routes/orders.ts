@@ -40,7 +40,7 @@ const fireEvents = (order: Order, req: Request) => {
 export const createOrder = middlewareAsync(async (req, res) => {
   try {
     const payload = req.body as T.Order.OrderCreationAttributes;
-    const order = await performOrderCreation(payload);
+    const order = await performOrderCreation(payload, req.app.get('Authorization-Server') as string);
     if (!order) {
       return res.status(400).json({ error: 'Failed to create new order' });
     }

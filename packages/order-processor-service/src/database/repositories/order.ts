@@ -4,13 +4,16 @@ import { Order, OrderItem, Transaction } from '../../models';
 import { ORDER_STATUSES } from '../../models/order';
 import { TRANSACTION_STATUSES, TRANSACTION_TYPES } from '../../models/transaction';
 
-export const createOrder = async (attributes: T.Order.OrderCreationAttributes): Promise<Order | null> => {
+export const createOrder = async (
+  attributes: T.Order.OrderCreationAttributes,
+  jwtServer?: string,
+): Promise<Order | null> => {
   try {
     return await dbConnection.transaction(async transaction => {
       // Fetch customer information from customer service.
       // This will fetch the existing customer or creating new one if it doesn't exist.
       // This is a blocking call to customer service.
-      const customer = await fetchCustomer(attributes.customer);
+      const customer = await fetchCustomer(attributes.customer, jwtServer);
       if (!customer) {
         return null;
       }

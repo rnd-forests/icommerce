@@ -2,7 +2,10 @@ import * as yup from 'yup';
 import { Order } from '../models';
 import * as orderRepository from '../database/repositories/order';
 
-export const createOrder = async (attributes: T.Order.OrderCreationAttributes): Promise<Order | null> => {
+export const createOrder = async (
+  attributes: T.Order.OrderCreationAttributes,
+  jwtServer?: string,
+): Promise<Order | null> => {
   const schema = yup.object().shape({
     customer: yup
       .object()
@@ -20,5 +23,5 @@ export const createOrder = async (attributes: T.Order.OrderCreationAttributes): 
     throw new Error('Invalid order creation attributes');
   }
 
-  return orderRepository.createOrder(attributes);
+  return orderRepository.createOrder(attributes, jwtServer);
 };
