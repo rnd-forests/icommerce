@@ -297,6 +297,133 @@ Sample events that are fired during order creation process.
 
 ![](./docs/images/activity-log-event-collaboration.jpg)
 
+The `activity-log` microservice will collect events from other microservices and store the logs accordingly. T300%his microservice doesn't emit any events to outside world (as ilustrated in the above diagram). Basicially, this microservice receives events from `order-processor` and `warehouse` microservices. Those events include:
+
+- `User Placed Order`
+- `User Viewed Product`
+- `User Search Products`
+
+All event will be published to `user:activities` topic. On `activity-log` microservice, we define multiple consumers to speed up the event processing performance.
+
+Sample events that are processed by `activity-log` microservice.
+
+`User Placed Order` Event: this event contains detailed information about the order as well as user request information such as domain, IP address and user agent.
+
+```json
+{
+  "id": "a675e637-055d-4ed8-92cf-76805e8a3323",
+  "time": "2022-07-16T09:18:46.756Z",
+  "type": "user:order:placed",
+  "source": "order-processor-service:order:e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+  "specversion": "1.0",
+  "datacontenttype": "application/json",
+  "metadata": {
+    "userid": "89286d4dc3a77e24e385ae83718c95596de6c9b59564e380127702c0f2b925ee",
+    "requestinfo": {
+      "domain": "localhost:3002",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.29.0"
+    }
+  },
+  "data": {
+    "id": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+    "customerId": "4ca06e5f-eb3c-4e20-ba03-338a2d0befd5",
+    "status": "new",
+    "total": "105.00",
+    "firstName": "Vinh",
+    "lastName": "Nguyen",
+    "phone": "+84349609698",
+    "createdAt": "2022-07-16T09:18:46.729Z",
+    "updatedAt": "2022-07-16T09:18:46.729Z",
+    "orderItems": [
+      {
+        "id": "7bae9f70-6672-4431-8a21-51291e4f7238",
+        "orderId": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+        "itemId": "314fb0ac-5e5d-4ca3-ace4-6465620b6eb7",
+        "price": "15.00",
+        "quantity": 2,
+        "createdAt": "2022-07-16T09:18:46.735Z",
+        "updatedAt": "2022-07-16T09:18:46.735Z"
+      },
+      {
+        "id": "58f028d8-7997-434d-92dd-8db8065efd95",
+        "orderId": "e10f1d81-ce52-4e84-93e7-77898e9eb7f0",
+        "itemId": "46bfcb7b-d769-45fb-8d8c-2b5079458e95",
+        "price": "25.00",
+        "quantity": 3,
+        "createdAt": "2022-07-16T09:18:46.735Z",
+        "updatedAt": "2022-07-16T09:18:46.735Z"
+      }
+    ]
+  }
+}
+```
+
+`User Viewed Product` Event:
+
+```json
+{
+  "id": "ae5eecae-36f7-40d8-97f9-2f50d9a66456",
+  "time": "2022-07-16T09:39:44.729Z",
+  "type": "user:product:viewed",
+  "source": "warehouse-service:product:6e7f704d-4f80-4fe0-9de5-46ff15d2fc11",
+  "specversion": "1.0",
+  "datacontenttype": "application/json",
+  "metadata": {
+    "userid": "fc1b456b4e3cc75a25f2e392ff2af83d25ef55bc14512392173960877b70913f",
+    "requestinfo": {
+      "domain": "localhost:3001",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.29.0"
+    }
+  },
+  "data": {
+    "id": "6e7f704d-4f80-4fe0-9de5-46ff15d2fc11",
+    "name": "Elegant Fantastic Metal Pizza",
+    "price": "699.00",
+    "branch": "Soft",
+    "color": "maroon",
+    "sku": 3,
+    "createdAt": "1999-04-22T03:33:56.893Z",
+    "updatedAt": "2030-09-26T12:07:28.229Z"
+  }
+}
+```
+
+`User Searched Product` Event: this event contains the search queries from the user and the list of matched products. Note that we only include the list of products in the first page of the paginated result.
+
+```json
+{
+  "id": "3a708204-a756-4a87-8729-c87e3e29cf63",
+  "time": "2022-07-16T09:40:52.165Z",
+  "type": "user:product:searching:filtering",
+  "source": "warehouse-service:products",
+  "specversion": "1.0",
+  "datacontenttype": "application/json",
+  "metadata": {
+    "userid": "fc1b456b4e3cc75a25f2e392ff2af83d25ef55bc14512392173960877b70913f",
+    "requestinfo": {
+      "domain": "localhost:3001",
+      "ip": "::1",
+      "userAgent": "PostmanRuntime/7.29.0"
+    }
+  },
+  "data": {
+    "query": {
+      "search": "elegant",
+      "filter": "color:maroon,branch:Soft",
+      "sortBy": "createdAt:desc,name:asc",
+      "limit": "2",
+      "offset": "0"
+    },
+    "matchedProductIds": [
+      "4b2c535c-a10d-40e5-9e66-f9b1ce2edd3b",
+      "7c9e1559-fa85-4ae6-a08a-abf0a539b602"
+    ]
+  }
+}
+```
+
 #### Microservice Worflow - SAGA Pattern
 
 ##### Order Processing Message Broker
