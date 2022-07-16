@@ -2,7 +2,8 @@
 
 - [iCommerce](#icommerce)
   - [High Level Architecture](#high-level-architecture)
-    - [Order Fullfillment Sequence Diagram](#order-fullfillment-sequence-diagram)
+    - [Order Fulfillment Sequence Diagram](#order-fulfillment-sequence-diagram)
+    - [Access Products Sequence Diagram](#access-products-sequence-diagram)
   - [Database Design](#database-design)
     - [Warehouse Microservice](#warehouse-microservice)
     - [Customer Microservice](#customer-microservice)
@@ -31,9 +32,13 @@
 
 ### High Level Architecture
 
-#### Order Fullfillment Sequence Diagram
+#### Order Fulfillment Sequence Diagram
 
 ![](./docs/images/sequences/order-sequence-diagram.svg)
+
+#### Access Products Sequence Diagram
+
+![](./docs/images/sequences/access-products-sequence-diagram.svg)
 
 ### Database Design
 

@@ -21,7 +21,9 @@ group #lightgrey search/filter products
 Client->Network Perimeter: search/filter products
 loop #white fetch next page in paginated result
 Network Perimeter->Warehouse Microservice: invoke list products API with filter and search queries
+activate Warehouse Microservice
 Warehouse Microservice-->Network Perimeter: matched products
+deactivate Warehouse Microservice
 Network Perimeter-->Client: forward matched products
 end
 end
