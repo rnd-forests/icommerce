@@ -9,7 +9,8 @@
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Modeling](#microservice-modeling)
     - [Microservice Communication Styles](#microservice-communication-styles)
-      - [Order Processing Event Collaboration](#order-processing-event-collaboration)
+      - [Synchronous Blocking via HTTP calls](#synchronous-blocking-via-http-calls)
+      - [Asynchronous Nonblocking using Message Broker](#asynchronous-nonblocking-using-message-broker)
     - [Microservice Worflow - SAGA Pattern](#microservice-worflow---saga-pattern)
       - [Order Processing Message Broker](#order-processing-message-broker)
     - [Microservice Security](#microservice-security)
@@ -153,9 +154,22 @@ This service use non-relational database MongoDB to store stream of events or ac
 TODO - DDD, CQRS, Event Sourcing, Domain Driven Design
 
 #### Microservice Communication Styles
-TODO
+To support data transfer between microservices, we use the following communication styles:
 
-##### Order Processing Event Collaboration
+- Synchronous Blocking via HTTP calls.
+- Asynchronous Nonblocking using event-driven approach, specifically, using topic-based message brokers.
+
+##### Synchronous Blocking via HTTP calls
+
+![](./docs/images/order-processor-and-customer-service.jpg)
+
+When placing new order by calling `POST /v1/orders` endpoint, the `order-processor` microservice need to process the customer information along the way. Here, the `order-processor` microservice will pass that responsibility to the downstream `customer` microservice. This process is done by calling `POST /v1/customers` endpoint exposed by `customer` microservice. This call to downstream microservice is blocking which means `order-processor` microservice must wait until the call has completed and potentially a response has been sent back from `customer` microservice.
+
+This method is used here to make sure the customer is persisted in our database before moving on to other actions. We don't implement a chain of blocking calls between a lot of microservices here, so this method is suitable for our current use case.
+
+This communication style has downsides. For example, `customer` microservice need to be reachable from `order-processor` microservice; otherwise, the operation carried by `order-processor` will fail. In that situation, `order-processor` microservice need to decide on complensating action to carry out. On possible action could be retrying the call until we reach a timeout or a maximum number of retries. Another issue is that `customer` may have a slow response time due to high load, network latency or performance degration. In those cases, the overall operation will be blocked for a prolonged period of time.
+
+##### Asynchronous Nonblocking using Message Broker
 
 ![](./docs/images/order_event_collaboration.jpg)
 
