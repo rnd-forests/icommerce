@@ -4,6 +4,7 @@
   - [Database Design](#database-design)
     - [Warehouse Microservice](#warehouse-microservice)
     - [Customer Microservice](#customer-microservice)
+    - [Order Processor Microservice](#order-processor-microservice)
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Modeling](#microservice-modeling)
     - [Microservice Communication Styles](#microservice-communication-styles)
@@ -80,6 +81,63 @@ We just add an additional unique index for `phone`:
 ```sql
 CREATE UNIQUE INDEX customers_phone ON customers USING btree(phone);
 ```
+
+#### Order Processor Microservice
+![](./docs/images/database/order-processor-db.png)
+
+This microservice has three tables: `orders`, `order_items` and `transactions`. The relationships between these table are as follows. Those relationships are represented by foreign keys between tables.
+
+- One order can have multiple order items.
+- One order has one transaction.
+
+**The** `orders` **table**:
+
+- `id`: table primary key in UUID format.
+- `customerId`: the customer associated with the order. We don't support registration functionality; however, we still track customers using their information like phone number. The value of this column is obtained from `customer` microservice.
+- `status`: the order status including: `new`, `pending` and `complete`.
+- `total`: the total amount of the order. In the scope of this project, the total will be the sum of all order items price. As we don't support taxes or promotions, we don't introduce other columns like `subtotal` for simplicity.
+- `firstName`, `lastName`, and `phone`: the customer information associated with the order. Those information would be stored in `customer` microservice as well. However, normally when viewing order details we need to fetch customer information in process. Putting some of customer common attributes here would reduce the communication between microservices.
+- `createdAt` and `updatedAt`: automatically generated timestamps for the record.
+
+This table has index for `customerId` column:
+
+```sql
+CREATE INDEX orders_customer_id ON public.orders USING btree("customerId");
+```
+
+**The** `order_items` **table**:
+
+- `id`: table primary key in UUID format.
+- `orderId`: the associated order.
+- `itemId`: the associated product. The value of this column should be obtained from `warehouse` microservice.
+- `price`: the product unit price.
+- `quantity`: the quantity of the product.
+- `createdAt` and `updatedAt`: automatically generated timestamps for the record.
+
+This table has indices for `orderId` and `itemId` columns:
+
+```sql
+CREATE INDEX order_items_item_id ON public.order_items USING btree("itemId");
+CREATE INDEX order_items_order_id ON public.order_items USING btree("orderId");
+```
+
+**The** `transactions` **table**:
+
+- `id`: table primary key in UUID format.
+- `customerId`: the customer associated with the order.
+- `orderId`: the associated order.
+- `type`: in this project we have two transaction types: `general` and `refund`. We probpably have more transactional types in real application.
+- `status`: the transaction status including: `new`, `pending` and `success`.
+- `createdAt` and `updatedAt`: automatically generated timestamps for the record.
+
+This table has indices for `orderId` and `customerId` columns:
+
+```sql
+CREATE INDEX transactions_customer_id ON public.transactions USING btree("customerId");
+CREATE INDEX transactions_order_id ON public.transactions USING btree("orderId");
+```
+
+If we support online payments, this table would includes other information such as: payment transaction reference, payment transaction status, payment provider information, ect.
 
 ### Development Principles and Patterns
 
