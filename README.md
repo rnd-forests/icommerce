@@ -2,6 +2,7 @@
 - [iCommerce](#icommerce)
   - [High Level Architecture](#high-level-architecture)
   - [Database Design](#database-design)
+    - [Warehouse Microservice](#warehouse-microservice)
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Modeling](#microservice-modeling)
     - [Microservice Communication Styles](#microservice-communication-styles)
@@ -24,14 +25,43 @@
 
 ### High Level Architecture
 
-- installation guide: setup script, docker, docker compose
 - authentication for order api??
 - cloud events, message format
-- NX graphq
 - rabittmq structure (channels, exchanges, queue, etc)
-- dev env (OS)
 - rate limit for order placed API???
 ### Database Design
+We use two types of database to store our data:
+- Relational database (PostgreSQL): to store products, orders and customers.
+- Non-relational database (MongoDB): to store activity logs.
+
+We'll go through the database structure and schema for each microservice. Some microservices are quite simple so they may contain only single table or collection.
+
+#### Warehouse Microservice
+![](./docs/images/database/warehouse-db.png)
+
+This microservice has a single table called `products` with the following fields:
+
+- `id`: table primary key in UUID format.
+- `name`: product name.
+- `product_search_vector`: in order to search for products, we utilize the PostgreSQL full text search capabilities (`to_tsvector` and `to_tsquery`). This column contains the vector after we convert the document using `to_tsvector` function. The content of this column will be updated using a trigger, so that it's up-to-date with new product attributes. We combine the three columns (searchable columns) before converting to vector: `name`, `branch` and `color`. One caveat is that we assume all texts are in English. More information can be found in [this migration](./packages/warehouse-service/src/database/migrations/20220709083425-create-products-table.js).
+- `price`: product price in the form of `x.yy` (e.g. `1.99`).
+- `branch`: product branch.
+- `color`: product color.
+- `sku`: product Stock Keeping Unit. This column value will be used by `order-processor` microservice to check the the availability of the products associated with a given order.
+- `createdAt` and `updatedAt`: automatically generated timestamps for the record.
+
+We also add some indices to support the searching and filtering functionalities.
+
+- A compound index for `branch` and `color`:
+
+```sql
+CREATE INDEX products_branch_color ON public.products USING btree (branch, color);
+```
+- A full text index for `product_search_vector`:
+
+```sql
+CREATE INDEX products_search ON public.products USING gin(product_search_vector);
+```
 
 ### Development Principles and Patterns
 
