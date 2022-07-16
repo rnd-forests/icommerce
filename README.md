@@ -9,7 +9,7 @@
     - [Warehouse Microservice](#warehouse-microservice)
     - [Customer Microservice](#customer-microservice)
     - [Order Processor Microservice](#order-processor-microservice)
-    - [Activity Log Service](#activity-log-service)
+    - [Activity Log Microservice](#activity-log-microservice)
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Communication Styles](#microservice-communication-styles)
       - [Synchronous Blocking via HTTP calls](#synchronous-blocking-via-http-calls)
@@ -158,7 +158,7 @@ CREATE INDEX transactions_order_id ON public.transactions USING btree("orderId")
 
 If we support online payments, this table would includes other information such as: payment transaction reference, payment transaction status, payment provider information, etc.
 
-#### Activity Log Service
+#### Activity Log Microservice
 
 This service use non-relational database MongoDB to store stream of events or activity logs. The database has a single collection for store user activity logs such as: placing order, searching and filtering products, etc. The collection is named `user_activities`. Each document inside collection has following structure:
 
