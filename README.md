@@ -2,6 +2,7 @@
 
 - [iCommerce](#icommerce)
   - [High Level Architecture](#high-level-architecture)
+    - [System Overview](#system-overview)
     - [Order Fulfillment Sequence Diagram](#order-fulfillment-sequence-diagram)
     - [Access Products Sequence Diagram](#access-products-sequence-diagram)
   - [Database Design](#database-design)
@@ -10,7 +11,6 @@
     - [Order Processor Microservice](#order-processor-microservice)
     - [Activity Log Service](#activity-log-service)
   - [Development Principles and Patterns](#development-principles-and-patterns)
-    - [Microservice Modeling](#microservice-modeling)
     - [Microservice Communication Styles](#microservice-communication-styles)
       - [Synchronous Blocking via HTTP calls](#synchronous-blocking-via-http-calls)
       - [Asynchronous Nonblocking using Message Broker](#asynchronous-nonblocking-using-message-broker)
@@ -31,6 +31,10 @@
     - [Create New Order](#create-new-order)
 
 ### High Level Architecture
+
+#### System Overview
+
+![](./docs/images/system-overview.svg)
 
 #### Order Fulfillment Sequence Diagram
 
@@ -163,10 +167,6 @@ This service use non-relational database MongoDB to store stream of events or ac
 - `payload`: the payload of the activity. The content of this attribute is quite flexible. It depends of each event type. We'll dicuss more about this in event collaboration section.
 
 ### Development Principles and Patterns
-
-#### Microservice Modeling
-
-TODO - DDD, CQRS, Event Sourcing, Domain Driven Design
 
 #### Microservice Communication Styles
 
