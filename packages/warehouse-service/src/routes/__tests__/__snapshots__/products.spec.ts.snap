@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Product Endpoints GET /v1/products 1`] = `
+Array [
+  "user:product:searching:filtering",
+  "warehouse-service:products",
+  Object {
+    "matchedProductIds": Array [
+      "35648c7d-1819-4556-a0ce-c7e496089880",
+    ],
+    "query": Object {},
+  },
+  Object {
+    "requestinfo": undefined,
+    "userid": undefined,
+  },
+]
+`;
+
+exports[`Product Endpoints GET /v1/products 2`] = `
+Array [
+  undefined,
+  "user:activities",
+  Object {
+    "name": "test",
+  },
+  Object {
+    "error": [Function],
+    "info": [Function],
+    "warn": [Function],
+  },
+]
+`;
+
+exports[`Product Endpoints succeeded: GET /v1/products/:id 1`] = `
+Array [
+  "user:product:viewed",
+  "warehouse-service:product:f2035fd2-22a8-4827-bc8e-a6896d213885",
+  Object {
+    "branch": "luxury",
+    "color": "red",
+    "createdAt": 2022-01-01T00:00:00.000Z,
+    "id": "f2035fd2-22a8-4827-bc8e-a6896d213885",
+    "name": "test",
+    "price": 2.99,
+    "sku": 10,
+    "updatedAt": 2022-01-01T00:00:00.000Z,
+  },
+  Object {
+    "requestinfo": undefined,
+    "userid": undefined,
+  },
+]
+`;
+
+exports[`Product Endpoints succeeded: GET /v1/products/:id 2`] = `
+Array [
+  undefined,
+  "user:activities",
+  Object {
+    "name": "test",
+  },
+  Object {
+    "error": [Function],
+    "info": [Function],
+    "warn": [Function],
+  },
+]
+`;
