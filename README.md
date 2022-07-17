@@ -522,6 +522,10 @@ To run all test cases inside the project:
 npm run test
 ```
 
+Sample testing output:
+
+![](./docs/images/sample-test-output.png)
+
 Tested OS environment:
 
 ```
