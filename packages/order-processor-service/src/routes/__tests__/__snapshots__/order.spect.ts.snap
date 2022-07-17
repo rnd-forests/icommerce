@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Order Endpoints POST /v1/orders 1`] = `
+Array [
+  Array [
+    "order:placed",
+    "order-processor-service:order:0d353781-594f-40d6-9f1e-66e47cc883ae",
+    Object {
+      "createdAt": 2022-01-01T00:00:00.000Z,
+      "customerId": "7cbf9769-ca46-4b3a-bb04-d91e93934eb7",
+      "firstName": "foo",
+      "id": "0d353781-594f-40d6-9f1e-66e47cc883ae",
+      "lastName": "bar",
+      "orderItems": Array [],
+      "phone": "12313123123",
+      "status": "new",
+      "total": "29.99",
+      "updatedAt": 2022-01-01T00:00:00.000Z,
+    },
+  ],
+  Array [
+    "user:order:placed",
+    "order-processor-service:order:0d353781-594f-40d6-9f1e-66e47cc883ae",
+    Object {
+      "createdAt": 2022-01-01T00:00:00.000Z,
+      "customerId": "7cbf9769-ca46-4b3a-bb04-d91e93934eb7",
+      "firstName": "foo",
+      "id": "0d353781-594f-40d6-9f1e-66e47cc883ae",
+      "lastName": "bar",
+      "orderItems": Array [],
+      "phone": "12313123123",
+      "status": "new",
+      "total": "29.99",
+      "updatedAt": 2022-01-01T00:00:00.000Z,
+    },
+    Object {
+      "requestinfo": undefined,
+      "userid": undefined,
+    },
+  ],
+]
+`;
+
+exports[`Order Endpoints POST /v1/orders 2`] = `
+Array [
+  Array [
+    undefined,
+    "order:processing",
+    undefined,
+    Object {
+      "error": [Function],
+      "info": [Function],
+      "warn": [Function],
+    },
+  ],
+  Array [
+    undefined,
+    "user:activities",
+    undefined,
+    Object {
+      "error": [Function],
+      "info": [Function],
+      "warn": [Function],
+    },
+  ],
+]
+`;

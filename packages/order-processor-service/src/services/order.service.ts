@@ -16,7 +16,8 @@ export const createOrder = async (
         yup
           .object()
           .shape({ id: yup.string().required(), price: yup.number().required(), quantity: yup.number().required() }),
-      ),
+      )
+      .min(1),
   });
 
   if (!(await schema.isValid(attributes))) {
