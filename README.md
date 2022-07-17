@@ -17,7 +17,6 @@
     - [Microservice Worflow - Saga Pattern](#microservice-worflow---saga-pattern)
     - [Microservice Security](#microservice-security)
       - [Service-to-Service Authentication](#service-to-service-authentication)
-    - [Microservice Testing](#microservice-testing)
   - [Installation Guides](#installation-guides)
   - [Project Structure, Frameworks and Libraries](#project-structure-frameworks-and-libraries)
     - [Codebase Structure](#codebase-structure)
@@ -479,8 +478,6 @@ Authentication using JWT is a bit more complicated. When using this kind of auth
 Using JWT token allows us to send additional data between microservices not just a simple stateless API key. We can also set expiry time for the token to reduce the attack surface if that token is somehow leaked.
 
 Currently, we generate the JWT token once when starting microservice and the expiry time is set to 30 days. We don't have the mechanism to obtain new JWT token if the current one is expired. We can implement additional feature to refresh the current JWT.
-
-#### Microservice Testing
 
 ### Installation Guides
 
