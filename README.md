@@ -519,6 +519,20 @@ Our microservices are located in `packages` directory. Each microservice has a `
 - `customer-service`: `3003`
 - `activity-log-service`: `3004`
 
+To run all test cases inside the project:
+
+```bash
+npm run test
+```
+
+Tested OS environment:
+
+```
+OS: Manjaro Linux x86_64
+Kernel: 5.15.53-1-MANJARO
+Shell: fish 3.4.1
+```
+
 ### Project Structure, Frameworks and Libraries
 
 #### Codebase Structure
