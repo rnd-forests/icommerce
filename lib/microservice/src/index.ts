@@ -100,7 +100,7 @@ export function Microservice(opts: MicroserviceInitOptions) {
   /**
    * Server to server authentication using JWT token.
    */
-  if (jwtConfigurations) {
+  if (jwtConfigurations && process.env.NODE_CONFIG_ENV !== 'testing') {
     app.use((req, res, next) => {
       if (jwtConfigurations.ignoredPaths.includes(req.path)) {
         next();
