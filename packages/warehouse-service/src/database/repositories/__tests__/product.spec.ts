@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns';
 import { Product } from '../../../models';
 import { productFactory } from '../../../test';
-import { getById, fetchProducts } from '../product';
+import { getById, fetchProducts, reserveProductStocks } from '../product';
 
 async function seedProducts() {
   return Promise.all([
@@ -9,6 +9,7 @@ async function seedProducts() {
       name: 'Elegant Product',
       color: 'red',
       branch: 'luxury',
+      sku: 5,
       createdAt: new Date(),
     }),
 
@@ -16,6 +17,7 @@ async function seedProducts() {
       name: 'Awesome Product',
       color: 'red',
       branch: 'super luxury',
+      sku: 10,
       createdAt: addDays(new Date(), 2),
     }),
 
@@ -23,6 +25,7 @@ async function seedProducts() {
       name: 'Awful Product',
       color: 'green',
       branch: 'normal',
+      sku: 15,
       createdAt: addDays(new Date(), 4),
     }),
   ]);
@@ -98,5 +101,82 @@ describe('Product Repository', () => {
     });
     expect(products.length).toEqual(1);
     expect(total).toEqual(3);
+  });
+
+  it('reserves product stocks', async () => {
+    const [p1, p2] = await seedProducts();
+    const reserved = await reserveProductStocks([
+      {
+        id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
+        orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
+        itemId: p1.id,
+        price: 2.99,
+        quantity: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+
+      {
+        id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
+        orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
+        itemId: p2.id,
+        price: 3.99,
+        quantity: 3,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    expect(reserved).toBe(true);
+
+    const freshP1 = await Product.findByPk(p1.id);
+    expect(freshP1?.sku).toEqual(p1.sku - 2);
+
+    const freshP2 = await Product.findByPk(p2.id);
+    expect(freshP2?.sku).toEqual(p2.sku - 3);
+  });
+
+  it('should not reserve stocks if products are not available', async () => {
+    await seedProducts();
+    const reserved = await reserveProductStocks([
+      {
+        id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
+        orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
+        itemId: 'bc98c3d1-c8a2-44aa-992f-834c7137722d', // random product ID
+        price: 2.99,
+        quantity: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    expect(reserved).toBe(false);
+  });
+
+  it('should not reserve stocks if item quanity exceeded product SKU', async () => {
+    const [p1, p2] = await seedProducts();
+    const reserved = await reserveProductStocks([
+      {
+        id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
+        orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
+        itemId: p1.id,
+        price: 2.99,
+        quantity: 100,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+
+      {
+        id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
+        orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
+        itemId: p2.id,
+        price: 3.99,
+        quantity: 50,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    expect(reserved).toBe(false);
   });
 });
