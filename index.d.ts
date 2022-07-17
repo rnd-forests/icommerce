@@ -1,10 +1,12 @@
 import { CloudEvent } from 'cloudevents';
-import { InferAttributes } from 'sequelize';
+import { Sequelize, InferAttributes } from 'sequelize';
 import { Product as ProductModel } from '@icommerce/warehouse-service/src/models';
 import { Customer as CustomerModel } from '@icommerce/customer-service/src/models';
 import { Order as OrderModel, OrderItem as OrderItemModel } from '@icommerce/order-processor-service/src/models';
 
 declare global {
+  const jestSequelize: Sequelize;
+
   namespace T {
     interface ObjectAny {
       [key: string]: any;

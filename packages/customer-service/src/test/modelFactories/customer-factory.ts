@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { faker } from '@faker-js/faker';
 import { Factory } from 'fishery';
 import { Customer } from '../../models';
@@ -7,7 +6,7 @@ export const customerFactory = Factory.define<T.Customer.CustomerSchema>(({ onCr
   onCreate(customer => Customer.build(customer).save());
 
   return {
-    id: uuidv4(),
+    id: faker.datatype.uuid(),
     firstName: faker.name.firstName(),
     lastName: faker.name.lastName(),
     phone: faker.phone.number(),

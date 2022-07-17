@@ -1,7 +1,8 @@
-// const config = require('config');
 const { createPgConnection } = require('@lib/server');
 
 const sequelize = createPgConnection(null);
+
+global.jestSequelize = sequelize;
 
 // Sequelize expects the "namespace" to essentially be a map with a "run" method.
 // https://github.com/sequelize/sequelize/blob/2fe980e2bc3f495ed1ccdc9ee2debb112cd3ddd5/lib/sequelize.js#L1119-L1124
