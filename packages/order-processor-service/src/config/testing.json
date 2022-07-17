@@ -1,0 +1,33 @@
+{
+  "serviceName": "order-processor-service",
+  "server": {
+    "apiKey": "",
+    "port": 3002,
+    "jsonLimit": "5mb",
+    "jwt": {
+      "secret": "1167163f-237d-4c3a-bf90-c27ebb3be6a4",
+      "expiresIn": "30 days",
+      "audience": ["customer-service"],
+      "ignoredPaths": ["/v1/orders"]
+    }
+  },
+  "amqp": {
+    "connection": "amqp://icommerce:icommerce@localhost:5672",
+    "orderExchanges": "order:processing|order:error",
+    "userActivitiesExchanges": "user:activities"
+  },
+  "customerService": {
+    "endpoint": "http://localhost:3003",
+    "apiKey": "11fc224e-0205-4cfa-a2d4-070b9607c2d1"
+  },
+  "database": {
+    "username": "order_processor_user_test",
+    "password": "order_processor_password_test",
+    "database": "order_processor_test",
+    "host": "127.0.0.1",
+    "port": 5439
+  },
+  "anonymousId": {
+    "secret": "81b515df-b3ae-468f-9392-b844f4112d35"
+  }
+}

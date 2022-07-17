@@ -1,0 +1,21 @@
+{
+  "serviceName": "customer-service",
+  "server": {
+    "apiKey": "11fc224e-0205-4cfa-a2d4-070b9607c2d1",
+    "port": 3003,
+    "jsonLimit": "5mb",
+    "jwt": {
+      "secret": "1167163f-237d-4c3a-bf90-c27ebb3be6a4",
+      "expiresIn": "30 days",
+      "audience": [],
+      "ignoredPaths": []
+    }
+  },
+  "database": {
+    "username": "customer_user_test",
+    "password": "customer_password_test",
+    "database": "customer_test",
+    "host": "127.0.0.1",
+    "port": 5438
+  }
+}

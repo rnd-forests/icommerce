@@ -13,6 +13,7 @@ module.exports = {
     node: true,
     browser: true,
     jest: true,
+    'jest/globals': true,
   },
   extends: [
     'airbnb',
@@ -27,7 +28,7 @@ module.exports = {
     __PROD__: false,
     __COVERAGE__: false,
   },
-  plugins: ['prettier', '@typescript-eslint'],
+  plugins: ['prettier', '@typescript-eslint', 'jest'],
   rules: {
     'class-methods-use-this': 'off',
     'prettier/prettier': [

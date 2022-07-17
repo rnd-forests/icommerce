@@ -8,7 +8,7 @@ import { ICommerceDebugger } from '@lib/common';
  * @param {ICommerceDebugger} logger
  * @returns {Sequelize}
  */
-export const createPgConnection = (logger: ICommerceDebugger): Sequelize =>
+export const createPgConnection = (logger: ICommerceDebugger | null): Sequelize =>
   new Sequelize({
     dialect: 'postgres',
     host: config.get('database.host') || 'localhost',
@@ -17,7 +17,7 @@ export const createPgConnection = (logger: ICommerceDebugger): Sequelize =>
     username: config.get('database.username') || 'postgres',
     password: config.get('database.password') || 'postgres',
     pool: { min: 5, max: 50, acquire: 10000 },
-    logging: (sql: string) => logger.info(sql),
+    logging: logger ? (sql: string) => logger.info(sql) : false,
   });
 
 export const initPgConnection = async (connection: Sequelize, logger: ICommerceDebugger) => {

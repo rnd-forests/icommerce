@@ -3,6 +3,7 @@ import { Microservice } from '@lib/microservice';
 import { initPgConnection } from '@lib/server';
 import { logger, dbConnection } from './config';
 import { getCustomerById, createCustomer } from './routes';
+import { defineModels } from './models';
 
 const { app, listen } = Microservice({
   serviceName: config.get('serviceName'),
@@ -17,7 +18,9 @@ const { app, listen } = Microservice({
   },
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
-  serverListenCb: async () => {},
+  serverListenCb: async () => {
+    defineModels();
+  },
   serverExit: async () => {
     await dbConnection.close();
     logger.info('Database connection closed.');

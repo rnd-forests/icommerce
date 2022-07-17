@@ -6,5 +6,13 @@
     "host": "127.0.0.1",
     "port": 5437,
     "dialect": "postgres"
+  },
+  "testing": {
+    "username": "order_processor_user_test",
+    "password": "order_processor_password_test",
+    "database": "order_processor_test",
+    "host": "127.0.0.1",
+    "port": 5439,
+    "dialect": "postgres"
   }
 }
