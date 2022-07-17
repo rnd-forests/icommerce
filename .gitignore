@@ -10,3 +10,4 @@ packages/*/.cache
 .idea
 .history
 .eslintcache
+coverage

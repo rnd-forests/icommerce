@@ -13,7 +13,8 @@
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "seed:all": "sequelize-cli db:seed:all",
-    "seed:undo": "sequelize-cli db:seed:undo"
+    "seed:undo": "sequelize-cli db:seed:undo",
+    "test": "TZ=UTC jest --config ./jest.config.ts --colors --runInBand"
   },
   "dependencies": {
     "@lib/common": "*",

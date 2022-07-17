@@ -14,7 +14,8 @@
     "compile": "npm run compile:module",
     "compile:module": "tsc -b tsconfig.json",
     "lint": "eslint --fix --color ./src",
-    "type:check": "tsc --noEmit"
+    "type:check": "tsc --noEmit",
+    "test": "TZ=UTC jest --config ./jest.config.ts --colors --runInBand"
   },
   "dependencies": {
     "blakejs": "^1.2.1",
