@@ -13,8 +13,8 @@
   - [Development Principles and Patterns](#development-principles-and-patterns)
     - [Microservice Communication Styles](#microservice-communication-styles)
       - [Synchronous Blocking via HTTP calls](#synchronous-blocking-via-http-calls)
-      - [Asynchronous Nonblocking using Message Broker](#asynchronous-nonblocking-using-message-broker)
-    - [Microservice Worflow - Saga Pattern](#microservice-worflow---saga-pattern)
+      - [Asynchronous Non-blocking using Message Broker](#asynchronous-non-blocking-using-message-broker)
+    - [Microservice Workflow - Saga Pattern](#microservice-workflow---saga-pattern)
     - [Microservice Security](#microservice-security)
       - [Service-to-Service Authentication](#service-to-service-authentication)
   - [Installation Guides](#installation-guides)
@@ -48,7 +48,7 @@
 
 We use two types of database to store our data:
 
-- Relational database (PostgreSQL): to store products, orders and customers.
+- Relational database (PostgreSQL): to store products, orders, transactions and customers.
 - Non-relational database (MongoDB): to store activity logs.
 
 We'll go through the database structure and schema for each microservice. Some microservices are quite simple so they may contain only single table or collection.
@@ -115,7 +115,7 @@ This microservice has three tables: `orders`, `order_items` and `transactions`. 
 - `customerId`: the customer associated with the order. We don't support registration functionality; however, we still track customers using their information like phone number. The value of this column is obtained from `customer` microservice.
 - `status`: the order status including: `new`, `pending` and `complete`.
 - `total`: the total amount of the order. In the scope of this project, the total will be the sum of all order items price. As we don't support taxes or promotions, we don't introduce other columns like `subtotal` for simplicity.
-- `firstName`, `lastName`, and `phone`: the customer information associated with the order. Those information would be stored in `customer` microservice as well. However, normally when viewing order details we need to fetch customer information in process. Putting some of customer common attributes here would reduce the communication between microservices.
+- `firstName`, `lastName`, and `phone`: the customer information associated with the order. That information would be stored in `customer` microservice as well. However, normally when viewing order details we need to fetch customer information in process. Putting some of customer common attributes here would reduce the communication between microservices.
 - `createdAt` and `updatedAt`: automatically generated timestamps for the record.
 
 This table has index for `customerId` column:
@@ -145,7 +145,7 @@ CREATE INDEX order_items_order_id ON public.order_items USING btree("orderId");
 - `id`: table primary key in UUID format.
 - `customerId`: the customer associated with the order.
 - `orderId`: the associated order.
-- `type`: in this project we have two transaction types: `general` and `refund`. We probpably have more transactional types in real application.
+- `type`: in this project we have two transaction types: `general` and `refund`. We probably have more transactional types in real application.
 - `status`: the transaction status including: `new`, `pending` and `success`.
 - `createdAt` and `updatedAt`: automatically generated timestamps for the record.
 
@@ -162,9 +162,9 @@ If we support online payments, this table would includes other information such 
 
 This service use non-relational database MongoDB to store stream of events or activity logs. The database has a single collection for store user activity logs such as: placing order, searching and filtering products, etc. The collection is named `user_activities`. Each document inside collection has following structure:
 
-- `type`: the type of the activity, basicially it's the event name.
-- `userId`: for some actions performed by a user, the identity of the client is consisdered anonymous. For example, when users browse the product catalog or view a specific product. The value of this `userId` attribute is the hashed value of domain, IP address and user agent where the request is originated.
-- `payload`: the payload of the activity. The content of this attribute is quite flexible. It depends of each event type. We'll dicuss more about this in event collaboration section.
+- `type`: the type of the activity, basically it's the event name.
+- `userId`: for some actions performed by a user, the identity of the client is considered anonymous. For example, when users browse the product catalog or view a specific product. The value of this `userId` attribute is the hashed value of domain, IP address and user agent where the request is originated.
+- `payload`: the payload of the activity. The content of this attribute is quite flexible. It depends of each event type. We'll discuss more about this in event collaboration section.
 
 ### Development Principles and Patterns
 
@@ -173,7 +173,7 @@ This service use non-relational database MongoDB to store stream of events or ac
 To support data transfer between microservices, we use the following communication styles:
 
 - Synchronous Blocking via HTTP calls.
-- Asynchronous Nonblocking using event-driven approach, specifically, using topic-based message brokers.
+- Asynchronous Non-blocking using event-driven approach, specifically, using topic-based message brokers.
 
 ##### Synchronous Blocking via HTTP calls
 
@@ -183,17 +183,17 @@ When placing new order by calling `POST /v1/orders` endpoint, the `order-process
 
 This method is used here to make sure the customer is persisted in our database before moving on to other actions. We don't implement a chain of blocking calls between a lot of microservices here, so this method is suitable for our current use case.
 
-This communication style has downsides. For example, `customer` microservice need to be reachable from `order-processor` microservice; otherwise, the operation carried by `order-processor` will fail. In that situation, `order-processor` microservice need to decide on complensating action to carry out. On possible action could be retrying the call until we reach a timeout or a maximum number of retries (in our application, when calling to `customer` microservice, we utilize retry capability of `got` package to retry request maximum of three times). Another issue is that `customer` may have a slow response time due to high load, network latency or performance degration. In those cases, the overall operation will be blocked for a prolonged period of time.
+This communication style has downsides. For example, `customer` microservice need to be reachable from `order-processor` microservice; otherwise, the operation carried by `order-processor` will fail. In that situation, `order-processor` microservice need to decide on compensating action to carry out. On possible action could be retrying the call until we reach a timeout or a maximum number of retries (in our application, when calling to `customer` microservice, we utilize retry capability of `got` package to retry request maximum of three times). Another issue is that `customer` may have a slow response time due to high load, network latency or performance degradation. In those cases, the overall operation will be blocked for a prolonged period of time.
 
-##### Asynchronous Nonblocking using Message Broker
+##### Asynchronous Non-blocking using Message Broker
 
-Different from synchronous blocking communication style, asynchronous nonblocking communication style is based on message broker. The message broker is a messaging system that allows microservices to communicate with each other. The message broker is a middleware that sits between the microservices and the underlying system. Rather than a microservice asking other microservices to do something, a microservice just emits their events and other microservices can listent to those events if they need. This communication style is asynchronous as event handlers will be running in their own thread of execution.
+Different from synchronous blocking communication style, asynchronous non-blocking communication style is based on message broker. The message broker is a messaging system that allows microservices to communicate with each other. The message broker is a middleware that sits between the microservices and the underlying system. Rather than a microservice asking other microservices to do something, a microservice just emits their events and other microservices can listen to those events if they need. This communication style is asynchronous as event handlers will be running in their own thread of execution.
 
 **Order Creation Event Collaboration**
 
 ![](./docs/images/order_event_collaboration.jpg)
 
-Placing an order is responsibility of several microservices in our system, inclucing: `order-processor`,`customer` and `warehouse`. Basicially speaking,
+Placing an order is responsibility of several microservices in our system, including: `order-processor`,`customer` and `warehouse`. Basically speaking,
 
 - `order-processor`: is the one that creates the order. This order is in `new` status.
 - `customer`: is responsible to fetch or create customer.
@@ -211,7 +211,7 @@ Here, we just illustrate the happy path when creating new order. We'll discuss e
 
 Sample events that are fired during order creation process.
 
-`Order Placed` Event: a fully detailed event that contains all information about the newly created order.
+`Order Placed` event: a fully detailed event that contains all information about the newly created order.
 
 ```json
 {
@@ -256,7 +256,7 @@ Sample events that are fired during order creation process.
 }
 ```
 
-`Stock Reserved` Event: this event contains the order ID as the `order-processor` already has detailed information of a given order.
+`Stock Reserved` event: this event contains the order ID as the `order-processor` already has detailed information of a given order.
 
 ```json
 {
@@ -273,7 +273,7 @@ Sample events that are fired during order creation process.
 }
 ```
 
-`Order Completed` Event: this event contains basic information of the order (not including the order items, e.g.)
+`Order Completed` event: this event contains basic information of the order (not including the order items, e.g.)
 
 ```json
 {
@@ -302,17 +302,17 @@ Sample events that are fired during order creation process.
 
 ![](./docs/images/activity-log-event-collaboration.jpg)
 
-The `activity-log` microservice will collect events from other microservices and store the logs accordingly. T300%his microservice doesn't emit any events to outside world (as ilustrated in the above diagram). Basicially, this microservice receives events from `order-processor` and `warehouse` microservices. Those events include:
+The `activity-log` microservice will collect events from other microservices and store the logs accordingly. This microservice doesn't emit any events to the outside world (as illustrated in the above diagram). Basically, this microservice receives events from `order-processor` and `warehouse` microservices. Those events include:
 
 - `User Placed Order`
 - `User Viewed Product`
 - `User Search Products`
 
-All event will be published to `user:activities` topic. On `activity-log` microservice, we define multiple consumers to speed up the event processing performance.
+All events will be published to `user:activities` topic. On `activity-log` microservice, we define multiple consumers to speed up the event processing throughput.
 
 Sample events that are processed by `activity-log` microservice.
 
-`User Placed Order` Event: this event contains detailed information about the order as well as user request information such as domain, IP address and user agent.
+`User Placed Order` event: this event contains detailed information about the order as well as the user request information such as domain, IP address and user agent.
 
 ```json
 {
@@ -364,7 +364,7 @@ Sample events that are processed by `activity-log` microservice.
 }
 ```
 
-`User Viewed Product` Event:
+`User Viewed Product` event:
 
 ```json
 {
@@ -395,7 +395,7 @@ Sample events that are processed by `activity-log` microservice.
 }
 ```
 
-`User Searched Product` Event: this event contains the search queries from the user and the list of matched products. Note that we only include the list of products in the first page of the paginated result.
+`User Searched Product` event: this event contains the search queries from the user and the list of matched products. Note that we only include the list of products in the first page of the paginated result.
 
 ```json
 {
@@ -428,40 +428,40 @@ Sample events that are processed by `activity-log` microservice.
 
 We use RabbitMQ to implement all event-driven operations in the system. It acts as both producer and consumer of events. Producers use an API (via Node.js SDK) to publish an event to the message broker. The broker handles subscriptions and notify consumers when an event arrives. Event-driven architecture can help to create more decoupled and scalable systems. However, this communication style also adds complexity to system infrastructure. We may face the situation where events are lost or the same event is sent multiple times.
 
-#### Microservice Worflow - Saga Pattern
+#### Microservice Workflow - Saga Pattern
 
-In previous section, we discuss the communication styles between microservices. How one microservice talks to another. To implement a business process, we need to collaboration between multiple microservices. As the data is distributed among microservices (each microservice has its own database), the data mannipulation flow is propagated through multiple microservices also.
+In previous section, we discuss the communication styles between microservices. How one microservice talks to another. To implement a business process, we need to collaboration between multiple microservices. As the data is distributed among microservices (each microservice has its own database), the data manipulation flow is propagated through multiple microservices also.
 
 In the context of a single microservice, we might need to combine several actions as an atomic one. When making multiple changes as part of an overall operation, we want to confirm that all the changes have been made. Otherwise, we need to clean up when errors happen. In our application, we utilize PostgreSQL database transaction to achieve that purpose. For example, when creating new order we wrap several database queries into single transaction: creating order, creating order items, creating transaction.
 
-As data is distributed across microservices, a simple database transaction cannot handle operations in different microservices that use different database connection or even different database technologies. We can use method like [2PC](https://en.wikipedia.org/wiki/Two-phase_commit_protocol) (two-phase commit) to implement a distributed transaction. However, I think is hard to implement. We may face situations like table locking issues, long-running operations, etc.
+As data is distributed across microservices, a simple database transaction cannot handle operations in different microservices that use different database connection or even different database technology. We can use some methods like [2PC](https://en.wikipedia.org/wiki/Two-phase_commit_protocol) (two-phase commit) to implement a distributed transactions. However, I think is hard to implement. We may face situations like table locking issues, long-running operations, etc.
 
-In the context of this application, we use [Saga](https://microservices.io/patterns/data/saga.html) to implement a distributed operation. Saga coordinate multiple changes in application state; however, it avoids the need for locking resources for long time and removes the need of a centralized coordinator (in case of Choreographed Saga) as in 2PC. Saga models the business workflow as discrete activities that can be excecuted independently. The following figure demonstrates the use of Saga pattern to implement order fulfillment worflow in our system.
+In the context of this application, we use [Saga](https://microservices.io/patterns/data/saga.html) to implement a distributed operation. Saga coordinate multiple changes in application state; however, it avoids the need for locking resources for long time and removes the need of a centralized coordinator (in case of Choreographed Saga) as in 2PC. Saga models the business workflow as discrete activities that can be executed independently. The following figure demonstrates the use of Saga pattern to implement order fulfillment workflow in our system.
 
 ![](docs/images/order_processing_message_broker.jpg)
 
-Basicially, in each microservice we still use ACID transactions to carry out operations. However, with external communications, we use message broker to represent the current order state. Other microservices can subscribe to the message broker and update the order state accordingly.
+Basically, in each microservice we still use ACID transactions to carry out operations. However, with external communications, we use message broker to represent the current order state. Other microservices can subscribe to the message broker and update the order state accordingly.
 
 To handle failures during Saga execution, we use **backward recovery** failure mode. It's the process of defining compensating actions that allow us to revert previously committed transactions.
 
-We use **Choreographed Saga** to implement order fullfillment workflow. As I understand, this kind of Saga will distribute responsibility to complete a given business operation among multiple collaborating microservices. Choreographed saga makes use of event collaboration between parties.
+We use **Choreographed Saga** to implement order fulfillment workflow. As I understand, this kind of Saga will distribute responsibility to complete a given business operation among multiple collaborating microservices. Choreographed saga makes use of event collaboration between parties.
 
 Let's discuss about what's going on in the above figure:
 
-First, we define two separated message broker topics to handle order succeededs event and order error events: `order:processing` and `order:error`. We can use a single topic for all events; however, we'll separate those events in our case.
+First, we define two separated message broker topics to handle order succeeded event and order error events: `order:processing` and `order:error`. We can use a single topic for all events; however, we'll separate those events in our case.
 
-- The client send the request to initiate the ordering process. Here, that request would go through several layers like API Gateway and finally hit our `order-processor` microservice **(1)**.
+- The client sends the request to initiate the ordering process. Here, that request would go through several layers like API Gateway and finally hit our `order-processor` microservice **(1)**.
 - The `order-processor` microservice performs order creation process. The order in this case will be in `new` status **(2)**.
 - The `order-processor` will contact `customer` service to retrieve customer information. This may create the customer in process **(3.1)**.
-- The `order-processor` will fire `order:placed` event. The `warehouse` microservice will receive that event, it knows its job is to reserve the product stocks and fire an event when that is done **(3.2)**.
-- The `warehouse` microservice reserve stock for products associated with a given order **(4)**.
+- The `order-processor` will fire `order:placed` event. When `warehouse` microservice receives that event, it knows its job is to reserve the product stocks and fire an event when that is done **(3.2)**.
+- The `warehouse` microservice reserves stock for products associated with a given order **(4)**.
 - If product stocks are reserved successfully, the `warehouse` microservice will fire `warehouse:stock:reserved` event **(5.1)**.
 - The `order-processor` microservice will pick up on `warehouse:stock:reserved` event and update order status to `complete` accordingly **(6)**.
 - If products are not available or running out of stock, `warehouse` microservice will fire `warehouse:stock:reserved:error` **(5.2)**.
 - If `warehouse:stock:reserved:error` is fired, a series of compensating actions would be performed. With `warehouse` microservice, it would be to revert any reserved product stock. In the context of our application, this can be done easily using database ACID transaction. However, if the `warehouse` communicate with other microservices and those microservices throw errors, we need to perform SQL queries to revert product stocks. For `order-processor` microservice, the compensation action would be to update order status to `pending`.
 - If the order fulfillment process is completed without any errors, `order-processor` will fire `order:completed` event **(7)**.
 
-Using Saga pattern, we can decouple the relationship between microservices, one service doesn't need to know about any other microservices. They only care when certain event is received. This would drastically reduce the amount of domain coupling. The downsides of this approach, I think, is the lack of an explicit representation of the business process; the compensating actions are normally (not always) push to microservices themselves. I think we can use tracking ID or corrleation ID to identify the order of events and use external tools to visualize the process using that kind of ID.
+Using Saga pattern, we can decouple the relationship between microservices, one service doesn't need to know about any other microservices. They only care when certain event is received. This would drastically reduce the amount of domain coupling. The downsides of this approach, I think, is the lack of an explicit representation of the business process; the compensating actions are normally (not always) push to microservices themselves. I think we can use tracking ID or correlation ID to identify the order of events and use external tools to visualize the process using that kind of ID.
 
 #### Microservice Security
 ##### Service-to-Service Authentication
@@ -474,7 +474,7 @@ In the context of our application, we implement two simple authentication mechan
 
 Authentication using API key is quite simple. When creating new microservice, we configure an API key for that microservice. Other microservices want to access that microservice need to obtain the API key first. After that, they can send that API key through `Authorization-ApiKey` custom header.
 
-Authentication using JWT is a bit more complicated. When using this kind of authentication mechanism, we assume that each microservice has an unique name. Let assume that microservice **A** wants to communicate with microservice **B**. We generate a JWT token from service **A** with the token audience claim set to the name of microservice **B**. On microservice **B** side, after receiving the JWT, it reads the audience claim and verifies that the audience value matched the service name. If so, the authentication process is consisdered succeeded. We use this kind of authentication between `order-processor` and `customer` microservices. The JWT token should be sent through `Authorization-Server` custom HTTP header.
+Authentication using JWT is a bit more complicated. When using this kind of authentication mechanism, we assume that each microservice has an unique name. Let assume that microservice **A** wants to communicate with microservice **B**. We generate a JWT token from service **A** with the token audience claim set to the name of microservice **B**. On microservice **B** side, after receiving the JWT, it reads the audience claim and verifies that the audience value matched the service name. If so, the authentication process is considered succeeded. We use this kind of authentication between `order-processor` and `customer` microservices. The JWT token should be sent through `Authorization-Server` custom HTTP header. The JWT signing process we use this this project is symmetric as the signing secret is shared between microservices. We can use public key encryption to avoid sharing secret between services.
 
 Using JWT token allows us to send additional data between microservices not just a simple stateless API key. We can also set expiry time for the token to reduce the attack surface if that token is somehow leaked.
 
@@ -546,7 +546,6 @@ Here's the general structure of project codebase.
 ├── babel.config.js
 ├── docker-compose.yml
 ├── docs
-│   └── images
 ├── .editorconfig
 ├── .eslintignore
 ├── .eslintrc.js
@@ -555,14 +554,16 @@ Here's the general structure of project codebase.
 │   ├── _
 │   └── pre-commit
 ├── index.d.ts
+├── jest.config.js
+├── jest.setup.js
 ├── lerna.json
 ├── lib
 │   ├── common
 │   ├── microservice
 │   ├── server
 │   └── webpack
-├── nx.json
 ├── .nx-cache
+├── nx.json
 ├── package.json
 ├── package-lock.json
 ├── packages
@@ -582,16 +583,16 @@ There're two main directories we need to focus on: `lib` and `packages`. Other a
 
 The `lib` directory contains shared codes and libraries that will be used by our microservices. All packages in `lib` will has the name with prefix `@lib/`.
 
-- `common`: contains logic for debugger, logging, tracing (for example, generating ID for anonymous users), and contants for event types, message broker topics, etc.
-- `microservice`: defines the boilerplate code for our microservices. It's a wrapper round `express` framework, Node.js HTTP server, simple middleware layers and a basic server-to-server authorization using API key (passed through the `Authorization-ApiKey` customer HTTP header).
-- `server`: defines the boilerplat for server common setups which include: database connections (PostgreSQL and MongoDB), Express.js middlewares, RabbitMQ connector/producer/consumer.
+- `common`: contains logic for debugger, logging, tracing (for example, generating ID for anonymous users), and constants for event types, message broker topics, etc.
+- `microservice`: defines the boilerplate code for our microservices. It's a wrapper round `express` framework, Node.js HTTP server, simple middleware layers and a basic server-to-server authorization using API key (passed through the `Authorization-ApiKey` customer HTTP header), or JWT (passed through the `Authorization-Server` customer HTTP header).
+- `server`: defines the boilerplate for server common setups which include: database connections (PostgreSQL and MongoDB), Express.js middlewares, RabbitMQ connector/producer/consumer.
 - `webpack`: defines the boilerplate for webpack configuration the will be used and extended by microservices.
 
 The `packages` directory contains the logic for all of our microservices. We define four microservices:
 
-- `warehouse-service`: this microservice is used to manage products and provide API endpoints to search, filter products as well as fetch product details. Thoose API endpoints will be used by our clients.
-- `order-processor-service`: as the name stated, this microservice is used to process orders. It exposes a single API endpoint `/api/v1/orders` to accept order from clients.
-- `customer-service`: this microservice is used to manage customers. As we don't have authentication logic, it acts as an auxiliary microservice by provides internal APIs that allow fetching, creating new customers based on the information provided by clients throught `order-processor-service`.
+- `warehouse-service`: this microservice is used to manage products and provide API endpoints to search, filter products as well as fetch product details. Those API endpoints will be used by our clients.
+- `order-processor-service`: as the name stated, this microservice is used to process orders. It exposes a single API endpoint `POST /api/v1/orders` to accept order from clients.
+- `customer-service`: this microservice is used to manage customers. As we don't have authentication logic, it acts as an auxiliary microservice by providing internal APIs that allow fetching, creating new customers based on the information provided by clients through `order-processor-service`.
 - `activity-log-service`: this microservice is used to collect logs about all activities that happen in the system. In the scope of this project, it collects user activities (placing orders, searching products, viewing products). This microservice doesn't expose any API, it receives events from other microservices and write them to MongoDB database.
 
 Here is a graph that demonstrates the relationship between packages in project.
@@ -608,7 +609,7 @@ Here're are the list of tools and frameworks used in this project:
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) for running local development containers (most of them are for data storage).
 - [ESLint](https://eslint.org/): to find and fix problems in JavaScript (TypeScript) code.
 - [Prettier](https://prettier.io/): to format our code.
-- [Babel](https://babeljs.io/): to transplie our codes that use next generation JavaScript syntax.
+- [Babel](https://babeljs.io/): to transpile our codes that use next generation JavaScript syntax.
 - [Webpack](https://webpack.js.org/): to bundle our codebase.
 - [PostgreSQL](https://www.postgresql.org/): the main database for some of our microservices: `warehouse`, `order-processor`, and `customer`.
 - [MongoDB](https://www.mongodb.com/): to store our activity logs in `activity-log` microservice.
@@ -690,7 +691,7 @@ Request queries:
 
 - `search`: match products by name, branch and color using fulltext search provided by PostgreSQL.
 - `filter`: a comma-separated list of filters in the form `<attribute>:<value>`. Note that, by conventions, `<attribute>` should be in model attributes. Invalid attributes will be ignored.
-- `sortBy`: a comma-separated list of sortings in the form `<attribute>:<direction>`. Note that, by conventions, `<attribute>` should be in model attributes. `<direction>` can be either `asc` or `desc`.
+- `sortBy`: a comma-separated list of sorting attributes in the form `<attribute>:<direction>`. Note that, by conventions, `<attribute>` should be in model attributes. `<direction>` can be either `asc` or `desc`.
 - `limit`, `offset`: these query parameters are used to paginate results.
 
 #### Find or Create Customer
@@ -804,8 +805,8 @@ Sample response:
 Note that, this API only handle the initial state of the order. Other order state transitions will be handled through event collaboration between microservices.
 
 ### Testing
-We provide unit tests in each microservice. Basicially, that includes:
+We provide unit tests in each microservice. Basically, that includes:
 
-- **Database Access Layer (repositories)**: test cases in this level are used to verify the database queries and database persistence. In order to do that, we spin up a test database instance and execute real database queries. Those test cases are more like integration tests are we need a real database as a dependency. However, I think it's better compared to mocking the public interface of the database connector. To isolate data between test cases, each test case is warpped inside a database transaction. After the test case is executed (succeeded or failed), we trigger the rollback for that transaction to clean up the data. We utilize [Sequelize Auto Transaction](https://sequelize.org/docs/v6/other-topics/transactions/#automatically-pass-transactions-to-all-queries) feature to implement rollback mechanism automatically for test cases.
+- **Database Access Layer (repositories)**: test cases in this level are used to verify the database queries and database persistence. In order to do that, we spin up a test database instance and execute real database queries. Those test cases are more like integration tests are we need a real database as a dependency. However, I think it's better compared to mocking the public interface of the database connector. To isolate data between test cases, each test case is wrapped inside a database transaction. After the test case is executed (succeeded or failed), we trigger the rollback for that transaction to clean up the data. We utilize [Sequelize Auto Transaction](https://sequelize.org/docs/v6/other-topics/transactions/#automatically-pass-transactions-to-all-queries) feature to implement rollback mechanism automatically for test cases.
 - **Services**: test cases in this level are used to verify the collaboration between DAL and other business logic. We'll mock or stub the DAL here. We'll verify additional things like request input validation, etc.
 - **API Endpoint**: test cases, in this case, are used to verify logic at routing level. We'll trigger API calls to our server and verify the response (status code, headers, body, etc). We also verify the expected events to be fired. Logic from **Services** will be stubbed out.
