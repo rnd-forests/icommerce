@@ -8,4 +8,4 @@ export const getAll = async (filter: T.Product.FetchProductsFilters): Promise<{ 
   productRepository.fetchProducts(filter);
 
 export const reserveProductStocks = async (orderItems: T.Order.OrderItemSchema[]): Promise<boolean> =>
-  productRepository.reserveProductStocksTransacting(orderItems);
+  productRepository.reserveProductStocks(orderItems);

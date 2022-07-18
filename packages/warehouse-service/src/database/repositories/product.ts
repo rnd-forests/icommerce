@@ -59,7 +59,7 @@ export const fetchProducts = async ({
 };
 
 // The stock reserving process here is quite naive, just for the demo.
-export const reserveProductStocks = async (
+export const reserveProductStocksInternal = async (
   orderItems: T.Order.OrderItemSchema[],
   transaction?: Transaction,
 ): Promise<boolean> => {
@@ -91,5 +91,5 @@ export const reserveProductStocks = async (
   return true;
 };
 
-export const reserveProductStocksTransacting = async (orderItems: T.Order.OrderItemSchema[], conn = dbConnection) =>
-  conn.transaction(async transaction => reserveProductStocks(orderItems, transaction));
+export const reserveProductStocks = async (orderItems: T.Order.OrderItemSchema[], conn = dbConnection) =>
+  conn.transaction(async transaction => reserveProductStocksInternal(orderItems, transaction));

@@ -2,12 +2,12 @@ import { getById, getAll, reserveProductStocks } from '../product.service';
 
 const mockRepositoryGetById = jest.fn();
 const mockRepositoryFetchProducts = jest.fn();
-const mockReserveProductStocksTransacting = jest.fn();
+const mockReserveProductStocks = jest.fn();
 jest.mock('../../database/repositories/product', () => ({
   getById: (...args: any) => mockRepositoryGetById(...args),
   fetchProducts: (...args: any) => mockRepositoryFetchProducts(...args),
-  reserveProductStocks: jest.fn(),
-  reserveProductStocksTransacting: (...args: any) => mockReserveProductStocksTransacting(...args),
+  reserveProductStocksInternal: jest.fn(),
+  reserveProductStocks: (...args: any) => mockReserveProductStocks(...args),
 }));
 
 describe('ProductService', () => {
@@ -37,6 +37,6 @@ describe('ProductService', () => {
       },
     ]);
 
-    expect(mockReserveProductStocksTransacting).toHaveBeenCalledTimes(1);
+    expect(mockReserveProductStocks).toHaveBeenCalledTimes(1);
   });
 });

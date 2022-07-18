@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns';
 import { Product } from '../../../models';
 import { productFactory } from '../../../test';
-import { getById, fetchProducts, reserveProductStocks } from '../product';
+import { getById, fetchProducts, reserveProductStocksInternal } from '../product';
 
 async function seedProducts() {
   return Promise.all([
@@ -105,7 +105,7 @@ describe('Product Repository', () => {
 
   it('reserves product stocks', async () => {
     const [p1, p2] = await seedProducts();
-    const reserved = await reserveProductStocks([
+    const reserved = await reserveProductStocksInternal([
       {
         id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
         orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
@@ -138,7 +138,7 @@ describe('Product Repository', () => {
 
   it('should not reserve stocks if products are not available', async () => {
     await seedProducts();
-    const reserved = await reserveProductStocks([
+    const reserved = await reserveProductStocksInternal([
       {
         id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
         orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
@@ -155,7 +155,7 @@ describe('Product Repository', () => {
 
   it('should not reserve stocks if item quanity exceeded product SKU', async () => {
     const [p1, p2] = await seedProducts();
-    const reserved = await reserveProductStocks([
+    const reserved = await reserveProductStocksInternal([
       {
         id: '3394a4bb-db11-457b-9c6b-95e17efbc27c',
         orderId: '25f0d785-d814-481b-95c1-d9c68941f992',
