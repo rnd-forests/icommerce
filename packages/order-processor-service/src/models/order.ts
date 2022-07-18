@@ -1,4 +1,31 @@
-import { Model, Sequelize, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import {
+  Model,
+  Sequelize,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  HasManyGetAssociationsMixin,
+  HasManySetAssociationsMixin,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyRemoveAssociationMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyHasAssociationsMixin,
+  HasManyCountAssociationsMixin,
+  HasOneGetAssociationMixin,
+  HasOneSetAssociationMixin,
+  HasOneCreateAssociationMixin,
+  NonAttribute,
+  Association,
+} from 'sequelize';
+
+import type { OrderItem } from './orderitem';
+import type { Transaction } from './transaction';
+
+type OrderAssociations = 'orderItems' | 'transaction';
 
 export const ORDER_STATUSES = {
   NEW: 'new',
@@ -6,7 +33,10 @@ export const ORDER_STATUSES = {
   COMPLETE: 'complete',
 };
 
-export class Order extends Model<InferAttributes<Order>, InferCreationAttributes<Order>> {
+export class Order extends Model<
+  InferAttributes<Order, { omit: OrderAssociations }>,
+  InferCreationAttributes<Order, { omit: OrderAssociations }>
+> {
   declare id: CreationOptional<string>;
 
   declare customerId: string;
@@ -24,6 +54,41 @@ export class Order extends Model<InferAttributes<Order>, InferCreationAttributes
   declare createdAt: CreationOptional<Date>;
 
   declare updatedAt: CreationOptional<Date>;
+
+  declare orderItems?: NonAttribute<OrderItem[]>;
+
+  declare getOrderItems: HasManyGetAssociationsMixin<OrderItem>;
+
+  declare setOrderItems: HasManySetAssociationsMixin<OrderItem, number>;
+
+  declare addOrderItem: HasManyAddAssociationMixin<OrderItem, number>;
+
+  declare addOrderItems: HasManyAddAssociationsMixin<OrderItem, number>;
+
+  declare createOrderItem: HasManyCreateAssociationMixin<OrderItem>;
+
+  declare removeOrderItem: HasManyRemoveAssociationMixin<OrderItem, number>;
+
+  declare removeOrderItems: HasManyRemoveAssociationsMixin<OrderItem, number>;
+
+  declare hasOrderItem: HasManyHasAssociationMixin<OrderItem, number>;
+
+  declare hasOrderItems: HasManyHasAssociationsMixin<OrderItem, number>;
+
+  declare countOrderItems: HasManyCountAssociationsMixin;
+
+  declare transaction?: NonAttribute<Transaction>;
+
+  declare getTransaction: HasOneGetAssociationMixin<Transaction>;
+
+  declare setTransaction: HasOneSetAssociationMixin<Transaction, number>;
+
+  declare createTransaction: HasOneCreateAssociationMixin<Transaction>;
+
+  declare static associations: {
+    orderItems: Association<Order, OrderItem>;
+    transaction: Association<Order, Transaction>;
+  };
 }
 
 export const defineOrder = (sequelize: Sequelize, model: typeof Order) => {

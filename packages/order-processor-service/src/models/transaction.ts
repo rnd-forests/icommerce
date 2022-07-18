@@ -1,4 +1,20 @@
-import { Model, Sequelize, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import {
+  Model,
+  Sequelize,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  Association,
+  NonAttribute,
+  BelongsToGetAssociationMixin,
+  BelongsToSetAssociationMixin,
+  BelongsToCreateAssociationMixin,
+} from 'sequelize';
+
+import type { Order } from './order';
+
+type TransactionAssociations = 'order';
 
 export const TRANSACTION_STATUSES = {
   NEW: 'new',
@@ -11,7 +27,10 @@ export const TRANSACTION_TYPES = {
   REFUND: 'refund',
 };
 
-export class Transaction extends Model<InferAttributes<Transaction>, InferCreationAttributes<Transaction>> {
+export class Transaction extends Model<
+  InferAttributes<Transaction, { omit: TransactionAssociations }>,
+  InferCreationAttributes<Transaction, { omit: TransactionAssociations }>
+> {
   declare id: CreationOptional<string>;
 
   declare customerId: string;
@@ -25,6 +44,18 @@ export class Transaction extends Model<InferAttributes<Transaction>, InferCreati
   declare createdAt: CreationOptional<Date>;
 
   declare updatedAt: CreationOptional<Date>;
+
+  declare order?: NonAttribute<Order>;
+
+  declare getOrder: BelongsToGetAssociationMixin<Order>;
+
+  declare setOrder: BelongsToSetAssociationMixin<Order, number>;
+
+  declare createOrder: BelongsToCreateAssociationMixin<Order>;
+
+  declare static associations: {
+    order: Association<Transaction, Order>;
+  };
 }
 
 export const defineTransaction = (sequelize: Sequelize, model: typeof Transaction) => {

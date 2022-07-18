@@ -1,6 +1,25 @@
-import { Model, Sequelize, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import {
+  Model,
+  Sequelize,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  Association,
+  NonAttribute,
+  BelongsToGetAssociationMixin,
+  BelongsToSetAssociationMixin,
+  BelongsToCreateAssociationMixin,
+} from 'sequelize';
 
-export class OrderItem extends Model<InferAttributes<OrderItem>, InferCreationAttributes<OrderItem>> {
+import type { Order } from './order';
+
+type OrderItemAssociations = 'order';
+
+export class OrderItem extends Model<
+  InferAttributes<OrderItem, { omit: OrderItemAssociations }>,
+  InferCreationAttributes<OrderItem, { omit: OrderItemAssociations }>
+> {
   declare id: CreationOptional<string>;
 
   declare orderId: string;
@@ -14,6 +33,18 @@ export class OrderItem extends Model<InferAttributes<OrderItem>, InferCreationAt
   declare createdAt: CreationOptional<Date>;
 
   declare updatedAt: CreationOptional<Date>;
+
+  declare order?: NonAttribute<Order>;
+
+  declare getOrder: BelongsToGetAssociationMixin<Order>;
+
+  declare setOrder: BelongsToSetAssociationMixin<Order, number>;
+
+  declare createOrder: BelongsToCreateAssociationMixin<Order>;
+
+  declare static associations: {
+    order: Association<OrderItem, Order>;
+  };
 }
 
 export const defineOrderItem = (sequelize: Sequelize, model: typeof OrderItem) => {
