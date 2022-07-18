@@ -28,6 +28,7 @@
     - [Find or Create Customer](#find-or-create-customer)
     - [Fetch Customer Detail](#fetch-customer-detail)
     - [Create New Order](#create-new-order)
+  - [Testing](#testing)
 
 ### High Level Architecture
 
@@ -801,3 +802,10 @@ Sample response:
 ```
 
 Note that, this API only handle the initial state of the order. Other order state transitions will be handled through event collaboration between microservices.
+
+### Testing
+We provide unit tests in each microservice. Basicially, that includes:
+
+- **Database Access Layer (repositories)**: test cases in this level are used to verify the database queries and database persistence. In order to do that, we spin up a test database instance and execute real database queries. Those test cases are more like integration tests are we need a real database as a dependency. However, I think it's better compared to mocking the public interface of the database connector. To isolate data between test cases, each test case is warpped inside a database transaction. After the test case is executed (succeeded or failed), we trigger the rollback for that transaction to clean up the data. We utilize [Sequelize Auto Transaction](https://sequelize.org/docs/v6/other-topics/transactions/#automatically-pass-transactions-to-all-queries) feature to implement rollback mechanism automatically for test cases.
+- **Services**: test cases in this level are used to verify the collaboration between DAL and other business logic. We'll mock or stub the DAL here. We'll verify additional things like request input validation, etc.
+- **API Endpoint**: test cases, in this case, are used to verify logic at routing level. We'll trigger API calls to our server and verify the response (status code, headers, body, etc). We also verify the expected events to be fired. Logic from **Services** will be stubbed out.
