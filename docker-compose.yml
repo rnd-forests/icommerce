@@ -110,7 +110,19 @@ services:
     volumes:
       - 'rabbitmq_data:/bitnami/rabbitmq/mnesia'
 
+  redis:
+    image: docker.io/bitnami/redis:7.0
+    environment:
+      - REDIS_PASSWORD=icommerce
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6380:6379'
+    restart: always
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+
 volumes:
+  redis_data:
   mongo_data:
   mongo_config:
   rabbitmq_data:

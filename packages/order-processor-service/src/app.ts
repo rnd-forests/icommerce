@@ -1,5 +1,7 @@
 import config from 'config';
 import { Microservice } from '@lib/microservice';
+import { createRatelimitMiddleware, createRedisConnection } from '@lib/server';
+import { RedisOptions } from 'ioredis';
 import { logger, dbConnection } from './config';
 import { createOrder } from './routes';
 import { defineModels } from './models';
@@ -27,6 +29,14 @@ const { app, listen } = Microservice({
   logger,
 });
 
-app.post('/v1/orders', createOrder);
+const redisClient = createRedisConnection(config.get<RedisOptions>('redis'), logger);
+const rateLimiter = createRatelimitMiddleware(
+  redisClient,
+  { max: 10 },
+  config.get<string>('anonymousId.secret'),
+  config.get('serviceName'),
+);
+
+app.post('/v1/orders', rateLimiter, createOrder);
 
 export { app, listen };
