@@ -628,7 +628,8 @@ Some of open-source packages used in project:
 
 ### API Endpoints
 
-Postman Collection: https://www.getpostman.com/collections/24daeb7f7e1b5dfe4377
+- Postman Collection: https://www.getpostman.com/collections/24daeb7f7e1b5dfe4377
+- Postman Environment: please refer to `docs/NAB iCommerce Env.postman_environment.json` and import Postman environment accordingly.
 
 #### Get Product Detail
 
