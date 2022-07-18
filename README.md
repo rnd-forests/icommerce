@@ -480,6 +480,8 @@ Using JWT token allows us to send additional data between microservices not just
 
 Currently, we generate the JWT token once when starting microservice and the expiry time is set to 30 days. We don't have the mechanism to obtain new JWT token if the current one is expired. We can implement additional feature to refresh the current JWT.
 
+We also add rate limiter to `POST /v1/orders` API to limit repeated requests to that public endpoint.
+
 ### Installation Guides
 
 This project is written in Node.js, so before you can use it, you need to install Node.js.
@@ -534,6 +536,8 @@ OS: Manjaro Linux x86_64
 Kernel: 5.15.53-1-MANJARO
 Shell: fish 3.4.1
 ```
+
+Currently, this project only supports development build for microservices. Testing credentials are hardcoded and committed directly to repository for local testing purpose.
 
 ### Project Structure, Frameworks and Libraries
 
