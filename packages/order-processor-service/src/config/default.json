@@ -5,10 +5,14 @@
     "port": 3002,
     "jsonLimit": "5mb",
     "jwt": {
-      "secret": "1167163f-237d-4c3a-bf90-c27ebb3be6a4",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEMbY6S9tE99X1+rbSmWly8ZLckkVY\n4ZNYWOQUhMpbWLXZUCJ52DL6YEe8gTflS3/Oy9T6el18kRYFggoaxPQCig==\n-----END PUBLIC KEY-----\n",
+      "privateKey": "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIJD+2KG3nXNsN2t/GAUVpQItkuVUF1/So5uOiJ9QfGzpoAoGCCqGSM49\nAwEHoUQDQgAEMbY6S9tE99X1+rbSmWly8ZLckkVY4ZNYWOQUhMpbWLXZUCJ52DL6\nYEe8gTflS3/Oy9T6el18kRYFggoaxPQCig==\n-----END EC PRIVATE KEY-----",
+      "algorithm": "ES256",
+      "issuer": "order-processor-service",
       "expiresIn": "30 days",
       "audience": ["customer-service"],
-      "ignoredPaths": ["/v1/orders"]
+      "ignoredPaths": ["/v1/orders"],
+      "audiencePublicKeys": {}
     }
   },
   "amqp": {

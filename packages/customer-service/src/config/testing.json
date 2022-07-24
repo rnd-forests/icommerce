@@ -5,10 +5,16 @@
     "port": 3003,
     "jsonLimit": "5mb",
     "jwt": {
-      "secret": "1167163f-237d-4c3a-bf90-c27ebb3be6a4",
+      "publicKey": "",
+      "privateKey": "",
+      "algorithm": "",
+      "issuer": "",
       "expiresIn": "30 days",
       "audience": [],
-      "ignoredPaths": []
+      "ignoredPaths": [],
+      "audiencePublicKeys": {
+        "order-processor-service": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEMbY6S9tE99X1+rbSmWly8ZLckkVY\n4ZNYWOQUhMpbWLXZUCJ52DL6YEe8gTflS3/Oy9T6el18kRYFggoaxPQCig==\n-----END PUBLIC KEY-----\n"
+      }
     }
   },
   "database": {

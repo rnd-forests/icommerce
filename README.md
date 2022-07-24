@@ -464,7 +464,9 @@ First, we define two separated message broker topics to handle order succeeded e
 Using Saga pattern, we can decouple the relationship between microservices, one service doesn't need to know about any other microservices. They only care when certain event is received. This would drastically reduce the amount of domain coupling. The downsides of this approach, I think, is the lack of an explicit representation of the business process; the compensating actions are normally (not always) push to microservices themselves. I think we can use tracking ID or correlation ID to identify the order of events and use external tools to visualize the process using that kind of ID.
 
 #### Microservice Security
+
 ##### Service-to-Service Authentication
+
 If our microservices are deployed to real infrastructure, we can use **mutual TLS** (mTLS) to implement a form of authentication between services. When a server talks to another server using mTLS, those servers are able to authenticate each other.
 
 In the context of our application, we implement two simple authentication mechanisms at microservice layer:
@@ -474,7 +476,7 @@ In the context of our application, we implement two simple authentication mechan
 
 Authentication using API key is quite simple. When creating new microservice, we configure an API key for that microservice. Other microservices want to access that microservice need to obtain the API key first. After that, they can send that API key through `Authorization-ApiKey` custom header.
 
-Authentication using JWT is a bit more complicated. When using this kind of authentication mechanism, we assume that each microservice has an unique name. Let assume that microservice **A** wants to communicate with microservice **B**. We generate a JWT token from service **A** with the token audience claim set to the name of microservice **B**. On microservice **B** side, after receiving the JWT, it reads the audience claim and verifies that the audience value matched the service name. If so, the authentication process is considered succeeded. We use this kind of authentication between `order-processor` and `customer` microservices. The JWT token should be sent through `Authorization-Server` custom HTTP header. The JWT signing process we use this this project is symmetric as the signing secret is shared between microservices. We can use public key encryption to avoid sharing secret between services.
+Authentication using JWT is a bit more complicated. When using this kind of authentication mechanism, we assume that each microservice has an unique name. Let assume that microservice **A** wants to communicate with microservice **B**. We generate a JWT token from service **A** with the token audience claim set to the name of microservice **B**. On microservice **B** side, after receiving the JWT, it reads the audience claim and verifies that the audience value matched the service name. If so, the authentication process is considered succeeded. We use this kind of authentication between `order-processor` and `customer` microservices. The JWT token should be sent through `Authorization-Server` custom HTTP header. The JWT signing process we use this this project is asymmetric using public key cryptography.
 
 Using JWT token allows us to send additional data between microservices not just a simple stateless API key. We can also set expiry time for the token to reduce the attack surface if that token is somehow leaked.
 
@@ -810,6 +812,7 @@ Sample response:
 Note that, this API only handle the initial state of the order. Other order state transitions will be handled through event collaboration between microservices.
 
 ### Testing
+
 We provide unit tests in each microservice. Basically, that includes:
 
 - **Database Access Layer (repositories)**: test cases in this level are used to verify the database queries and database persistence. In order to do that, we spin up a test database instance and execute real database queries. Those test cases are more like integration tests are we need a real database as a dependency. However, I think it's better compared to mocking the public interface of the database connector. To isolate data between test cases, each test case is wrapped inside a database transaction. After the test case is executed (succeeded or failed), we trigger the rollback for that transaction to clean up the data. We utilize [Sequelize Auto Transaction](https://sequelize.org/docs/v6/other-topics/transactions/#automatically-pass-transactions-to-all-queries) feature to implement rollback mechanism automatically for test cases.

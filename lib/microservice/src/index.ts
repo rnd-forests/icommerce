@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { Server } from 'http';
 import express from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload, Algorithm } from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import { ICommerceDebugger } from '@lib/common';
 import _isError from 'lodash/isError';
@@ -21,10 +21,13 @@ interface MicroserviceInitOptions {
   serverJsonLimit: string;
   logger: ICommerceDebugger;
   jwtConfigurations?: {
-    secret: string;
+    publicKey: string;
+    privateKey: string;
+    algorithm: string;
     expiresIn: string | number;
     issuer: string;
     audience: string[]; // The list of microservices that this microservice communicates with.
+    audiencePublicKeys: { [key: string]: string };
     ignoredPaths: string[];
   };
 }
@@ -109,7 +112,21 @@ export function Microservice(opts: MicroserviceInitOptions) {
 
       const jwtToken = req.get('Authorization-Server') || '';
       try {
-        const decoded = jwt.verify(jwtToken, jwtConfigurations.secret, { complete: true });
+        const unverifiedDecoded = jwt.decode(jwtToken, { complete: true });
+        const { iss } = unverifiedDecoded?.payload as JwtPayload;
+        if (!iss) {
+          res.status(401).send({ message: authorizationErrMessage });
+          return;
+        }
+
+        const issuerKey = Object.keys(jwtConfigurations.audiencePublicKeys).find(key => key === iss);
+        if (!issuerKey) {
+          res.status(401).send({ message: authorizationErrMessage });
+          return;
+        }
+
+        const issuerPublicKey = jwtConfigurations.audiencePublicKeys[issuerKey] as string;
+        const decoded = jwt.verify(jwtToken, issuerPublicKey, { complete: true });
         const { aud } = decoded.payload as JwtPayload;
         if (!aud) {
           res.status(401).send({ message: authorizationErrMessage });
@@ -128,15 +145,25 @@ export function Microservice(opts: MicroserviceInitOptions) {
       }
     });
 
-    app.use((_req, _res, next) => {
-      const jwtToken = jwt.sign({}, jwtConfigurations.secret, {
-        audience: jwtConfigurations.audience,
-        expiresIn: jwtConfigurations.expiresIn,
-        issuer: jwtConfigurations.issuer,
+    // Only generate Authorization-Server header value if private key is available.
+    if (jwtConfigurations.privateKey && jwtConfigurations.algorithm) {
+      app.use((_req, _res, next) => {
+        if (app.get('Authorization-Server')) {
+          next();
+          return;
+        }
+
+        const jwtToken = jwt.sign({}, jwtConfigurations.privateKey, {
+          audience: jwtConfigurations.audience,
+          expiresIn: jwtConfigurations.expiresIn,
+          issuer: jwtConfigurations.issuer,
+          algorithm: jwtConfigurations.algorithm as Algorithm,
+        });
+        logger.info(`[SERVER] generated JWT token: ${jwtToken}`);
+        app.set('Authorization-Server', jwtToken);
+        next();
       });
-      app.set('Authorization-Server', jwtToken);
-      next();
-    });
+    }
   }
 
   app.use(helmet());
