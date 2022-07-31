@@ -9,7 +9,7 @@
     "dev:compile": "rm -rf dist && webpack --config webpack.server.js --no-stats --watch",
     "type:check": "tsc --noEmit",
     "lint": "eslint --fix --color ./src",
-    "test": "TZ=UTC jest --config ./jest.config.ts --colors --runInBand"
+    "test": "TZ=UTC jest --config ./jest.config.ts --colors --runInBand --detectOpenHandles"
   },
   "dependencies": {
     "@lib/common": "*",
