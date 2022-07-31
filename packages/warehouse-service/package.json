@@ -15,7 +15,7 @@
     "seed:all": "sequelize-cli db:seed:all",
     "seed:undo": "sequelize-cli db:seed:undo",
     "migrate:test": "NODE_CONFIG_ENV=testing NODE_CONFIG_DIR=./src/config NODE_ENV=testing npm run migrate:up",
-    "jest": "NODE_CONFIG_ENV=testing NODE_CONFIG_DIR=./src/config TZ=UTC jest --config ./jest.config.js --colors --runInBand",
+    "jest": "NODE_CONFIG_ENV=testing NODE_CONFIG_DIR=./src/config TZ=UTC jest --config ./jest.config.js --colors --runInBand --detectOpenHandles",
     "test": "npm run migrate:test && npm run jest"
   },
   "dependencies": {
