@@ -26,8 +26,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "removeComments": true,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "jsx": "react"
+    "lib": ["DOM", "DOM.Iterable", "ESNext"]
   },
   "exclude": ["node_modules", "dist", "migrations"],
   "files": ["index.d.ts"]

@@ -5,13 +5,12 @@ name: iCommerce CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   ci:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -19,17 +18,21 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - name: Set up testing databases
-      run: docker compose -f docker-compose-ci.yml up -d
-    - name: Removing Lerna Nx cache
-      run: rm -rf .nx-cache
-    - name: Installing dependencies and compliling libraries
-      run: npm run deps
-    - name: Running unit tests
-      run: npm run test
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Set up testing databases
+        run: docker compose -f docker-compose-ci.yml up -d
+      - name: Removing Lerna Nx cache
+        run: rm -rf .nx-cache
+      - name: Installing dependencies and compling libraries
+        run: npm run deps
+      - name: Linting codebase
+        run: npm run lint:all
+      - name: Checking outdated packages
+        run: npm run package:outdated
+      - name: Running unit tests
+        run: npm run test

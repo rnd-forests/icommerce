@@ -19,6 +19,7 @@ const { listen } = Microservice({
       DBServices.init(DB);
     }
   },
+  // eslint-disable-next-line @typescript-eslint/require-await
   serverExit: async () => {
     Mongo.client.close(mongoError => {
       if (mongoError) {

@@ -1,9 +1,0 @@
-node_modules/
-dist/
-coverage/
-build/
-scripts/
-lib/config/
-lib/styles/
-webpack.config.js
-webpack.server.js

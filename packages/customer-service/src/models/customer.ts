@@ -1,5 +1,6 @@
 import { Sequelize, Model, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 
+// eslint-disable-next-line no-use-before-define
 class Customer extends Model<InferAttributes<Customer>, InferCreationAttributes<Customer>> {
   declare id: CreationOptional<string>;
 

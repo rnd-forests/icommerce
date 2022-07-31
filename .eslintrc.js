@@ -29,6 +29,7 @@ module.exports = {
     __COVERAGE__: false,
   },
   plugins: ['prettier', '@typescript-eslint', 'jest'],
+  ignorePatterns: ['dist', 'node_modules', 'coverage', 'build', 'scripts', 'webpack.server.js', '__tests__'],
   rules: {
     'class-methods-use-this': 'off',
     'prettier/prettier': [
@@ -68,6 +69,9 @@ module.exports = {
         extensions: ['.js', '.ts'],
         moduleDirectory: ['**/*/node_modules'],
       },
+    },
+    react: {
+      version: '18.2.0',
     },
   },
 };

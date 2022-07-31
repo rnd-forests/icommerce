@@ -20,6 +20,7 @@ const { app, listen } = Microservice({
   },
   serverPort: config.get<number>('server.port'),
   serverJsonLimit: config.get('server.jsonLimit'),
+  // eslint-disable-next-line @typescript-eslint/require-await
   serverListenCb: async () => {
     defineModels();
   },
