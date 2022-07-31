@@ -1,0 +1,32 @@
+version: '3.3'
+
+services:
+  postgres.warehouse-service.test:
+    image: postgres:13.2
+    environment:
+      POSTGRES_USER: warehouse_user_test
+      POSTGRES_PASSWORD: warehouse_password_test
+      POSTGRES_DB: warehouse_test
+    ports:
+      - '5440:5432'
+    restart: always
+
+  postgres.customer-service.test:
+    image: postgres:13.2
+    environment:
+      POSTGRES_USER: customer_user_test
+      POSTGRES_PASSWORD: customer_password_test
+      POSTGRES_DB: customer_test
+    ports:
+      - '5438:5432'
+    restart: always
+
+  postgres.order-processor-service.test:
+    image: postgres:13.2
+    environment:
+      POSTGRES_USER: order_processor_user_test
+      POSTGRES_PASSWORD: order_processor_password_test
+      POSTGRES_DB: order_processor_test
+    ports:
+      - '5439:5432'
+    restart: always
