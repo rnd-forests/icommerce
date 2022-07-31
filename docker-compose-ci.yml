@@ -30,12 +30,3 @@ services:
     ports:
       - '5439:5432'
     restart: always
-
-  redis:
-    image: docker.io/bitnami/redis:7.0
-    environment:
-      - REDIS_PASSWORD=icommerce
-      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
-    ports:
-      - '6380:6379'
-    restart: always

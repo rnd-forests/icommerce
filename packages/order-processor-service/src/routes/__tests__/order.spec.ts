@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
+import { RequestHandler } from 'express';
 import request, { Response } from 'supertest';
 import { app } from '../../app';
 import { orderFactory } from '../../test';
@@ -17,13 +18,18 @@ jest.mock('@lib/common', () => ({
 
 const mockRabbitMqPublish = jest.fn();
 const mockRabbitMqConstructEvent = jest.fn();
-jest.mock('@lib/server', () => ({
-  ...jest.requireActual('@lib/server'),
-  rabbitmq: {
-    publish: (...args: any) => mockRabbitMqPublish(...args),
-    constructEvent: (...args: any) => mockRabbitMqConstructEvent(...args),
-  },
-}));
+jest.mock('@lib/server', () => {
+  const middlewareDummy: RequestHandler = (_req, _res, next) => next();
+  return {
+    ...jest.requireActual('@lib/server'),
+    createRedisConnection: jest.fn(),
+    createRatelimitMiddleware: jest.fn().mockReturnValue(middlewareDummy),
+    rabbitmq: {
+      publish: (...args: any) => mockRabbitMqPublish(...args),
+      constructEvent: (...args: any) => mockRabbitMqConstructEvent(...args),
+    },
+  };
+});
 
 jest.useFakeTimers().setSystemTime(new Date('2022-01-01').getTime());
 
