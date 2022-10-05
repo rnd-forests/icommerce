@@ -3,7 +3,7 @@
     "lib/*",
     "packages/*"
   ],
-  "useNx": true,
+  "useNx": false,
   "useWorkspaces": true,
   "version": "independent"
 }
